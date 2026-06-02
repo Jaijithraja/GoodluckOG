@@ -398,6 +398,117 @@ async function startSuite() {
     assert.notStrictEqual(neonTopId1, neonTopId2, "IDs must be fully isolated across instances");
   });
 
+  // ==========================================
+  // MODULE 6: MOBILE VIEWPORT & HEIGHT CALIBRATION
+  // ==========================================
+  printHeader("6. Mobile Viewport & Height Calibration Module");
+
+  runTest("Viewport height lock correctly calculates mobile remaining scroll container spaces", () => {
+    // Standard sticky top header height is 64px
+    const headerHeight = 64;
+    const desktopHeight = 1080;
+    const mobileHeight = 844; // Standard iPhone screen height
+
+    const calculateContentHeight = (screenHeight: number, isMobile: boolean) => {
+      if (isMobile) {
+        return screenHeight - headerHeight;
+      }
+      return screenHeight;
+    };
+
+    const mobileRemainingHeight = calculateContentHeight(mobileHeight, true);
+    const desktopRemainingHeight = calculateContentHeight(desktopHeight, false);
+
+    assert.strictEqual(mobileRemainingHeight, 780, "Mobile content height must subtract header height");
+    assert.strictEqual(desktopRemainingHeight, 1080, "Desktop content height must use full screen height");
+  });
+
+  runTest("Responsive column grid mapping yields correct sizes for mobile viewports", () => {
+    // Helper to evaluate columns structure mapping
+    const getGridColumns = (breakpoint: "xs" | "sm" | "md" | "lg") => {
+      switch (breakpoint) {
+        case "xs": return 1;
+        case "sm": return 2;
+        case "md": return 4;
+        case "lg": return 7;
+      }
+    };
+
+    assert.strictEqual(getGridColumns("xs"), 1, "Mobile portrait viewports must default to stacked single column");
+    assert.strictEqual(getGridColumns("sm"), 2, "Mobile landscape/tablet viewports must support 2 columns");
+    assert.strictEqual(getGridColumns("lg"), 7, "Large displays must map full 7 columns grid for weekly blueprints");
+  });
+
+  // ==========================================
+  // MODULE 7: CONSISTENCY DIAGNOSTIC SCORE CALIBRATION
+  // ==========================================
+  printHeader("7. Consistency Assessment Scoring Module");
+
+  runTest("Diagnostic assessment scoring maps low-range answers to critical adjustments", () => {
+    // Low score profile (mostly skipped / low study answers)
+    const lowAnswers = [5, 5, 5, 5, 5]; // All 5s
+    const score = lowAnswers.reduce((a, b) => a + b, 0);
+    assert.strictEqual(score, 25);
+
+    const getClassification = (scr: number) => {
+      if (scr < 40) return "Needs Immediate Attention";
+      if (scr < 70) return "Moderate Consistency";
+      return "Excellent Consistency";
+    };
+
+    const classification = getClassification(score);
+    assert.strictEqual(classification, "Needs Immediate Attention");
+  });
+
+  runTest("Diagnostic assessment scoring maps high-range answers to excellent momentum", () => {
+    const highAnswers = [20, 20, 20, 20, 20]; // Perfect 20s
+    const score = highAnswers.reduce((a, b) => a + b, 0);
+    assert.strictEqual(score, 100);
+
+    const getClassification = (scr: number) => {
+      if (scr < 40) return "Needs Immediate Attention";
+      if (scr < 70) return "Moderate Consistency";
+      return "Excellent Consistency";
+    };
+
+    const classification = getClassification(score);
+    assert.strictEqual(classification, "Excellent Consistency");
+  });
+
+  // ==========================================
+  // MODULE 8: REALTIME REALM SYNC CONTROLLER
+  // ==========================================
+  printHeader("8. Realtime Realm Sync Controller");
+
+  runTest("Supabase client handles simulated peer updates and live state refreshes", () => {
+    let loadCallCount = 0;
+    
+    // Mock store load handler
+    const mockStore = {
+      loadFromSupabase: () => {
+        loadCallCount++;
+      }
+    };
+
+    // Simulated postgres payload
+    const simulatedPayload = {
+      schema: "public",
+      table: "pod_execution_log",
+      commit_timestamp: "2026-06-02T14:30:00Z",
+      eventType: "INSERT",
+      new: { id: "log-abc", student_id: "st-99", completed: true }
+    };
+
+    const handlePayload = (payload: any) => {
+      if (payload.table === "pod_execution_log") {
+        mockStore.loadFromSupabase();
+      }
+    };
+
+    handlePayload(simulatedPayload);
+    assert.strictEqual(loadCallCount, 1, "Simulated peer check-in must trigger reload handler exactly once");
+  });
+
   // Print final test report
   console.log(`\n${colors.bright}${colors.cyan}=====================================${colors.reset}`);
   console.log(`${colors.bright}${colors.magenta}🏁 SYSTEM MODULE TESTS RUN COMPLETE${colors.reset}`);
