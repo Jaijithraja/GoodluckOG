@@ -106,13 +106,7 @@ export default function TodayPlanPage() {
       const user = sessionRes.data.session?.user;
 
       if (!user) {
-        // If not logged in, we check if student data is active in Zustand
-        if (student) {
-          setPageLoading(false);
-          return;
-        }
-        // Otherwise, redirect to onboarding
-        router.push("/onboarding");
+        router.push("/login");
         return;
       }
 

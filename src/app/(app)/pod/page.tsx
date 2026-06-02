@@ -55,11 +55,7 @@ export default function PodPage() {
       const user = sessionRes.data.session?.user;
 
       if (!user) {
-        if (student) {
-          setPageLoading(false);
-          return;
-        }
-        router.push("/onboarding");
+        router.push("/login");
         return;
       }
 

@@ -34,19 +34,7 @@ export default function SettingsPage() {
       const user = sessionRes.data.session?.user;
 
       if (!user) {
-        if (student) {
-          setName(student.name);
-          setExamDate(student.exam_date);
-          setWeekdayHours(student.available_hours_weekday);
-          setWeekendHours(student.available_hours_weekend);
-          setPeakEnergy(student.peak_energy_window);
-          setStudyStyle(student.study_style);
-          setDreamIIM(student.dreamIIM || "A");
-          setTargetPercentile(student.target_percentile || 99.0);
-          setPageLoading(false);
-          return;
-        }
-        router.push("/onboarding");
+        router.push("/login");
         return;
       }
 

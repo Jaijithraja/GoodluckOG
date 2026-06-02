@@ -13,7 +13,13 @@ export default function LoginPage() {
   const loadFromLocalStorage = useStudentStore((state) => state.loadFromLocalStorage);
 
   useEffect(() => {
-    router.replace("/dashboard");
+    const checkSession = async () => {
+      const sessionRes = await supabase.auth.getSession();
+      if (sessionRes.data.session?.user) {
+        router.replace("/dashboard");
+      }
+    };
+    checkSession();
   }, [router]);
 
   const [email, setEmail] = useState("");

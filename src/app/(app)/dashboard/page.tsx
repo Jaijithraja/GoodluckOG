@@ -33,11 +33,7 @@ export default function DashboardPage() {
       const user = sessionRes.data.session?.user;
 
       if (!user) {
-        if (student) {
-          setPageLoading(false);
-          return;
-        }
-        router.push("/onboarding");
+        router.push("/login");
         return;
       }
 
@@ -176,71 +172,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* 0. MOCKUP MODE GLASSMORPHIC BANNER */}
-      {student.isDemo && (
-        <div className="bg-[#FEF3E6]/10 border border-warning/30 rounded-lg p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-warm animate-fade-in backdrop-blur-sm">
-          <div className="space-y-1">
-            <span className="font-mono text-[9px] font-black text-warning tracking-widest uppercase flex items-center gap-1.5">
-              <Sparkles size={10} className="stroke-[2.5]" />
-              MOCKUP DEMO ACTIVE
-            </span>
-            <p className="text-xs text-text-secondary leading-relaxed font-sans">
-              You are exploring simulated habit timelines and weekly targets for <span className="text-text-primary font-bold">{student.name}</span>.
-            </p>
-          </div>
-          
-          <div className="flex gap-2">
-            <button
-              onClick={async () => {
-                await generateMockupData();
-                setToastMessage("Fresh mockup timeline generated!");
-                setTimeout(() => setToastMessage(""), 3000);
-              }}
-              className="bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[10px] font-mono font-bold tracking-wider py-1.5 px-4 rounded-md uppercase transition-all cursor-pointer"
-            >
-              🔄 Get New Mockup Plan
-            </button>
-            <button
-              onClick={async () => {
-                await clearDemoData();
-                router.push("/onboarding");
-              }}
-              className="border border-[#F59E0B]/40 hover:bg-[#F59E0B]/10 text-warning text-[10px] font-mono font-bold tracking-wider py-1.5 px-4 rounded-md uppercase transition-colors cursor-pointer"
-            >
-              🚀 Start Real Plan
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* 1. SIMULATION CONTROLS */}
-      <div className="bg-bg-surface border border-dashed border-accent/40 rounded-lg p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <span className="font-mono text-[9px] font-black text-accent tracking-widest uppercase block mb-1">
-            SIMULATION CONTROL PANEL
-          </span>
-          <p className="text-xs text-text-secondary leading-relaxed font-sans">
-            Fast-forward remaining days to trigger Acceleration or Crunch prep rules in real-time.
-          </p>
-        </div>
-        
-        <div className="flex gap-2 flex-wrap">
-          {[
-            { label: "200 Days (Foundation)", val: 200 },
-            { label: "120 Days (Acceleration)", val: 120 },
-            { label: "45 Days (Crunch)", val: 45 },
-            { label: "5 Days (Final Week)", val: 5 }
-          ].map((btn) => (
-            <button
-              key={btn.val}
-              onClick={() => setDaysRemaining(btn.val)}
-              className="bg-bg-elevated border border-border hover:border-accent hover:bg-accent-light text-[10px] font-mono font-bold tracking-wider py-1.5 px-3 rounded-md text-text-secondary hover:text-accent-text transition-colors cursor-pointer uppercase shadow-sm"
-            >
-              {btn.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* 1B. COGNITIVE CARE LAYER AI INTERVENTION BANNER */}
       {student.burnout_risk_score >= 0.6 && (

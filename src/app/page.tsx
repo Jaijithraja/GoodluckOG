@@ -58,24 +58,8 @@ const QUESTIONS = [
 
 export default function Home() {
   const router = useRouter();
-  const loadFromLocalStorage = useStudentStore((state) => state.loadFromLocalStorage);
   const student = useStudentStore((state) => state.student);
-  const generateMockupData = useStudentStore((state) => state.generateMockupData);
-  const clearDemoData = useStudentStore((state) => state.clearDemoData);
-
-  const handleSeeHowItWorks = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    await generateMockupData();
-    router.push("/dashboard");
-  };
-
-  const handleStartRealPlan = async (e: React.MouseEvent) => {
-    if (student && student.isDemo) {
-      e.preventDefault();
-      await clearDemoData();
-      router.push("/onboarding");
-    }
-  };
+  const loadFromLocalStorage = useStudentStore((state) => state.loadFromLocalStorage);
 
   const [mounted, setMounted] = useState(false);
 
@@ -331,10 +315,10 @@ export default function Home() {
         {/* Right CTA */}
         <div className="flex items-center gap-3">
           <Link 
-            href={mounted && student ? "/dashboard" : "/onboarding"} 
+            href={mounted && student ? "/dashboard" : "/signup"} 
             className="bg-text-primary hover:bg-text-primary/90 text-bg-base text-[10px] font-mono font-bold tracking-widest py-2.5 px-6 rounded-full transition-all uppercase"
           >
-            {mounted && student ? (student.isDemo ? "Dashboard (Mockup)" : "My Dashboard") : "Start My Plan"}
+            {mounted && student ? "My Dashboard" : "Start My Plan"}
           </Link>
         </div>
       </nav>
@@ -411,37 +395,20 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 pt-2 items-center">
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <Link
-                href={mounted && student && !student.isDemo ? "/dashboard" : "/onboarding"}
-                onClick={handleStartRealPlan}
+                href={mounted && student ? "/dashboard" : "/signup"}
                 className="bg-accent text-[#0A0A0A] text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase shadow-md animate-cta-glow cursor-pointer text-center"
               >
-                {mounted && student && !student.isDemo ? "Resume My Plan" : "Start My CAT Plan"}
+                {mounted && student ? "Go to Dashboard" : "Start My CAT Plan"}
               </Link>
-              {mounted && student && !student.isDemo ? (
+              {!student && (
                 <Link
-                  href="/dashboard"
-                  className="border border-border-strong hover:border-text-primary text-text-primary text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase bg-bg-surface/60 hover:bg-bg-surface text-center"
+                  href="/login"
+                  className="border border-border-strong hover:border-text-primary text-text-primary text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase bg-bg-surface/60 hover:bg-bg-surface text-center font-bold"
                 >
-                  My Dashboard
+                  Sign In
                 </Link>
-              ) : (
-                <button
-                  onClick={handleSeeHowItWorks}
-                  className="border border-border-strong hover:border-text-primary text-text-primary text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase bg-bg-surface/60 hover:bg-bg-surface cursor-pointer"
-                >
-                  See How It Works
-                </button>
               )}
             </div>
-            
-            {(!student || student.isDemo) && (
-              <Link
-                href="/onboarding"
-                className="text-xs font-mono text-text-secondary hover:text-accent tracking-wider font-bold transition-colors mt-2 sm:mt-0 underline sm:no-underline"
-              >
-                Try it live →
-              </Link>
-            )}
           </div>
 
           {/* Social Proof avatars */}
@@ -720,11 +687,10 @@ export default function Home() {
                   This is an interactive preview. The real Goodluck adapts this daily based on your logs.
                 </span>
                 <Link
-                  href={mounted && student && !student.isDemo ? "/dashboard" : "/onboarding"}
-                  onClick={handleStartRealPlan}
+                  href={mounted && student ? "/dashboard" : "/signup"}
                   className="bg-white hover:bg-white/90 text-black text-[10px] font-mono font-black py-3.5 px-8 rounded-full transition-all uppercase tracking-wider text-center"
                 >
-                  {mounted && student && !student.isDemo ? "View My Study Plan" : "Get my actual plan"}
+                  {mounted && student ? "View My Study Plan" : "Get my actual plan"}
                 </Link>
               </div>
             </div>
@@ -809,11 +775,10 @@ export default function Home() {
                   Retry Assessment
                 </button>
                 <Link
-                  href={mounted && student && !student.isDemo ? "/dashboard" : "/onboarding"}
-                  onClick={handleStartRealPlan}
-                  className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[9px] font-mono font-bold tracking-widest py-2.5 px-6 rounded-full uppercase transition-all text-center"
+                  href={mounted && student ? "/dashboard" : "/signup"}
+                  className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[9px] font-mono font-bold tracking-widest py-2.5 px-6 rounded-full transition-all text-center font-bold"
                 >
-                  {mounted && student && !student.isDemo ? "View My Study Plan" : "Get My Personalized Plan"}
+                  {mounted && student ? "View My Study Plan" : "Get My Personalized Plan"}
                 </Link>
               </div>
             </div>
@@ -1027,11 +992,10 @@ export default function Home() {
 
           <div className="flex justify-center pt-4">
             <Link
-              href={mounted && student && !student.isDemo ? "/dashboard" : "/onboarding"}
-              onClick={handleStartRealPlan}
-              className="bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[11px] font-mono font-bold tracking-widest py-4 px-10 rounded-full uppercase transition-all shadow-md animate-cta-glow cursor-pointer"
+              href={mounted && student ? "/dashboard" : "/signup"}
+              className="bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[11px] font-mono font-bold tracking-widest py-4 px-10 rounded-full uppercase transition-all shadow-md animate-cta-glow cursor-pointer font-bold"
             >
-              {mounted && student && !student.isDemo ? "Continue My Preparation" : "Start Preparing Today"}
+              {mounted && student ? "Continue My Preparation" : "Start Preparing Today"}
             </Link>
           </div>
         </div>
@@ -1055,8 +1019,8 @@ export default function Home() {
               Study Core
             </h4>
             <ul className="space-y-2 text-[11px] font-mono text-text-secondary uppercase tracking-wider list-none font-bold p-0 m-0">
-              <li><Link href="/onboarding" className="hover:text-accent transition-colors">Mock Planner</Link></li>
-              <li><Link href="/onboarding" className="hover:text-accent transition-colors">Study Tracker</Link></li>
+              <li><Link href="/signup" className="hover:text-accent transition-colors">Mock Planner</Link></li>
+              <li><Link href="/signup" className="hover:text-accent transition-colors">Study Tracker</Link></li>
               <li><a href="#quiz" className="hover:text-accent transition-colors">Consistency Streaks</a></li>
             </ul>
           </div>

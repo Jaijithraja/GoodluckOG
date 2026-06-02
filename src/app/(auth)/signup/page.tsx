@@ -13,7 +13,13 @@ export default function SignupPage() {
   const setStudentProfile = useStudentStore((state) => state.setStudentProfile);
 
   useEffect(() => {
-    router.replace("/onboarding");
+    const checkSession = async () => {
+      const sessionRes = await supabase.auth.getSession();
+      if (sessionRes.data.session?.user) {
+        router.replace("/dashboard");
+      }
+    };
+    checkSession();
   }, [router]);
 
   const [email, setEmail] = useState("");

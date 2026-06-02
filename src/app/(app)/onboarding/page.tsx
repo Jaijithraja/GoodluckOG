@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useStudentStore } from "@/store/studentStore";
 import { Target, Clock, Activity, BookOpen, Heart, ArrowRight, ArrowLeft, Sparkles, CheckCircle2, RotateCcw } from "lucide-react";
@@ -23,6 +23,16 @@ export default function OnboardingPage() {
   const [error, setError] = useState("");
 
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const sessionRes = await supabase.auth.getSession();
+      if (!sessionRes.data.session?.user) {
+        router.push("/signup");
+      }
+    };
+    checkAuth();
+  }, [router]);
   const [formData, setFormData] = useState({
     name: "",
     dreamIIM: "A",
@@ -79,63 +89,7 @@ export default function OnboardingPage() {
       const user = sessionRes.data.session?.user;
 
       if (!user) {
-        // Guest user onboarding pipeline - Save to local Zustand store
-        await useStudentStore.getState().setStudentProfile({
-          name: formData.name || "Aspirant",
-          exam_date: formData.examDate,
-          target_percentile: Number(formData.targetPercentile),
-          available_hours_weekday: Number(formData.weekdayHours),
-          available_hours_weekend: Number(formData.weekendHours),
-          peak_energy_window: formData.peakEnergy as any,
-          study_style: formData.studyStyle as any,
-          biggest_fear: formData.biggestFear || "",
-          onboarding_complete: true,
-          dreamIIM: formData.dreamIIM || "A",
-        });
-
-        // Set the active student's isDemo to false because they just completed actual onboarding!
-        const localStoreState = useStudentStore.getState();
-        if (localStoreState.student) {
-          localStoreState.student.isDemo = false;
-          
-          // If mock score was entered, seed a custom mock result in the local store
-          if (formData.hasMockScore && formData.lastMockScore) {
-            const scoreVal = parseFloat(formData.lastMockScore);
-            await localStoreState.logMockResult({
-              mock_date: new Date().toISOString().split("T")[0],
-              source: "Other",
-              overall_percentile: scoreVal,
-              varc_percentile: Math.min(99.9, Math.max(50, scoreVal + 1)),
-              dilr_percentile: Math.min(99.9, Math.max(50, scoreVal - 2)),
-              quant_percentile: Math.min(99.9, Math.max(50, scoreVal + 1)),
-              varc_score: Math.round(scoreVal * 0.3),
-              dilr_score: Math.round(scoreVal * 0.25),
-              quant_score: Math.round(scoreVal * 0.2),
-              varc_time_minutes: 40,
-              dilr_time_minutes: 40,
-              quant_time_minutes: 40,
-              total_attempts: 75,
-              total_accuracy: 78.5,
-            });
-          }
-
-          // Force local storage backup save
-          localStorage.setItem("goodluck_student_state_v2", JSON.stringify({
-            student: localStoreState.student,
-            topicWeights: localStoreState.topicWeights,
-            dailyPlans: localStoreState.dailyPlans,
-            sessionLogs: localStoreState.sessionLogs,
-            mockResults: localStoreState.mockResults,
-            adaptationLogs: localStoreState.adaptationLogs,
-            burnoutScores: localStoreState.burnoutScores,
-            weeklyReports: localStoreState.weeklyReports,
-            podMembers: localStoreState.podMembers,
-            podJoined: localStoreState.podJoined,
-            podCheckin: localStoreState.podCheckin,
-          }));
-        }
-
-        router.push("/today");
+        setError("You must be logged in to save your study plan.");
         setLoading(false);
         return;
       }
