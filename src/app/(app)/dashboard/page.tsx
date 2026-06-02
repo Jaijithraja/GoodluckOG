@@ -33,11 +33,11 @@ export default function DashboardPage() {
       const user = sessionRes.data.session?.user;
 
       if (!user) {
-        if (student && student.isDemo) {
+        if (student) {
           setPageLoading(false);
           return;
         }
-        router.push("/login");
+        router.push("/onboarding");
         return;
       }
 

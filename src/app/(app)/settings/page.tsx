@@ -34,7 +34,7 @@ export default function SettingsPage() {
       const user = sessionRes.data.session?.user;
 
       if (!user) {
-        if (student && student.isDemo) {
+        if (student) {
           setName(student.name);
           setExamDate(student.exam_date);
           setWeekdayHours(student.available_hours_weekday);
@@ -46,7 +46,7 @@ export default function SettingsPage() {
           setPageLoading(false);
           return;
         }
-        router.push("/login");
+        router.push("/onboarding");
         return;
       }
 
