@@ -191,12 +191,12 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2 border-b border-border pb-4">
             <AlertCircle className="text-accent stroke-[2]" size={20} />
             <h3 className="font-display font-bold text-base text-text-primary uppercase tracking-wide">
-              Diagnostic Weight Models
+              Your Topic Priority List
             </h3>
           </div>
 
           <p className="text-xs text-text-secondary leading-relaxed font-sans">
-            Your live active attention weights calculated by the adaptation engine. Higher weights prioritize study blocks in Today&apos;s planner.
+            Topics with higher priority scores will get more study slots in your daily schedule automatically.
           </p>
 
           <div className="space-y-3 pt-2">
@@ -214,7 +214,7 @@ export default function SettingsPage() {
 
                 <div className="flex items-center gap-3">
                   <span className="font-mono text-[10px] text-text-secondary font-bold uppercase">
-                    Attention Weight:
+                    Priority Score:
                   </span>
                   <span className="font-mono text-xs font-black text-accent">
                     {tw.weight.toFixed(2)}

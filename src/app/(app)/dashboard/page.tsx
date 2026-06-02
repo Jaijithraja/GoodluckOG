@@ -152,15 +152,15 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-2">
               <span className="font-mono text-[9px] font-black text-warning tracking-widest uppercase">
-                COGNITIVE CARE LAYERS INTERVENTION ACTIVE
+                STUDY COACH NOTICE: TAKE A BREATH
               </span>
               <p className="font-display italic text-text-primary text-sm leading-relaxed">
-                {burnoutLoading ? "Synthesizing support telemetry..." : burnoutMessage || "Sustaining focused execution is hard. Take a deliberate breath and look at how far you've come today."}
+                {burnoutLoading ? "Preparing coaching tips..." : burnoutMessage || "Staying consistent every day is tough. Take a deep breath and look at how much you've accomplished so far."}
               </p>
               <div className="flex items-center gap-4 text-[10px] font-mono font-bold text-text-secondary">
-                <span className="uppercase">Rolling fatigue: {Math.round(student.burnout_risk_score * 100)}%</span>
+                <span className="uppercase">Fatigue Level: {Math.round(student.burnout_risk_score * 100)}%</span>
                 <span>&bull;</span>
-                <span className="text-warning uppercase font-black">Intervention: Take standard Decompression Day</span>
+                <span className="text-warning uppercase font-black">Recommended Action: Take a scheduled rest day</span>
               </div>
             </div>
           </div>
@@ -176,16 +176,16 @@ export default function DashboardPage() {
             <Flame size={120} className="stroke-[1.5]" />
           </div>
           <span className="font-mono text-[10px] text-text-secondary tracking-wider uppercase block font-bold">
-            Execution Streak
+            Consistency Streak
           </span>
           <div className="flex items-baseline gap-2 mt-4 mb-2">
             <span className="font-display font-semibold text-5xl text-accent leading-none">
               {sessionLogs.filter((l) => l.completed).length > 0 ? 5 : 0}
             </span>
-            <span className="text-xs font-mono text-text-secondary uppercase font-bold">days shown</span>
+            <span className="text-xs font-mono text-text-secondary uppercase font-bold">days active</span>
           </div>
           <p className="text-[10px] text-text-secondary font-sans leading-relaxed">
-            Non-weaponized focus. Your momentum is preserved cleanly.
+            Great job staying focused and building momentum.
           </p>
         </div>
 
@@ -232,20 +232,20 @@ export default function DashboardPage() {
         {/* Vitality Indicator */}
         <div className="bg-bg-elevated border border-border rounded-lg p-6 flex flex-col justify-between relative overflow-hidden shadow-warm">
           <span className="font-mono text-[10px] text-text-secondary tracking-wider uppercase block font-bold">
-            Execution Vitality
+            Consistency Score
           </span>
           <div className="flex items-baseline gap-2 mt-4 mb-2">
             <span className="font-display font-semibold text-5xl text-accent leading-none">
               {executionHealth}%
             </span>
-            <span className="text-xs font-mono text-text-secondary uppercase font-bold">efficiency</span>
+            <span className="text-xs font-mono text-text-secondary uppercase font-bold">Plan Completed</span>
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${student.burnout_risk_score >= 0.75 ? "bg-danger animate-ping" : "bg-success"}`} />
               <span className="text-[10px] font-mono text-text-secondary uppercase font-bold">
-                {student.burnout_risk_score >= 0.75 ? "Recovery Protocol Active" : "Neuro-fatigue locked: Healthy"}
+                {student.burnout_risk_score >= 0.75 ? "Rest Day Advised" : "Fatigue Level: Healthy"}
               </span>
             </div>
 
@@ -253,7 +253,7 @@ export default function DashboardPage() {
               onClick={manualRecovery}
               className="w-full bg-bg-surface hover:bg-accent-light border border-border text-[10px] font-mono font-bold tracking-wider py-1.5 rounded-md text-text-secondary hover:text-accent-text hover:border-accent/40 transition-colors cursor-pointer uppercase text-center shadow-sm"
             >
-              Trigger Decompression Day
+              Take a Rest Day
             </button>
           </div>
         </div>

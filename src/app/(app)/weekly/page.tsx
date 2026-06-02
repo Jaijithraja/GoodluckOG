@@ -146,10 +146,10 @@ export default function WeeklyPage() {
         <div className="space-y-6 animate-fade-in">
           <div className="bg-bg-elevated border border-border p-5 rounded-lg shadow-sm">
             <span className="font-mono text-[9px] text-accent uppercase tracking-widest font-black block mb-1">
-              SCHEDULING ALGORITHM STATUS
+              WEEKLY SCHEDULE STATUS
             </span>
             <p className="text-xs text-text-secondary leading-relaxed">
-              Plan auto-calibrates. Increasing master topic weights on your **Prioritisation Board** instantly shifts more slots to that subject.
+              Your study schedule updates automatically when you change topic priorities in Today&apos;s plan.
             </p>
           </div>
 

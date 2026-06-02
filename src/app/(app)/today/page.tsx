@@ -331,7 +331,7 @@ export default function TodayPlanPage() {
         {activePlan && (
           <div className="bg-bg-base border border-border rounded-md p-4 text-xs">
             <span className="font-mono text-[9px] text-accent uppercase tracking-widest font-black block mb-1">
-              AI SYSTEM DIRECTIVE
+              AI STUDY TIP
             </span>
             <p className="text-text-secondary leading-relaxed font-sans">{activePlan.rationale}</p>
           </div>
@@ -346,10 +346,10 @@ export default function TodayPlanPage() {
           <div className="space-y-1">
             <h2 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2">
               <Sliders size={18} className="text-accent" />
-              Dynamic Prioritisation Board
+              Subject Priority Board
             </h2>
             <p className="text-xs text-text-secondary font-sans leading-relaxed">
-              Real-time calibration weights mapping student cognitive fatigue and mastery gaps.
+              A live view of topics needing more attention based on your preparation progress.
             </p>
           </div>
         </div>
@@ -357,24 +357,24 @@ export default function TodayPlanPage() {
         <div className="space-y-3.5">
           {[...topicWeights].sort((a, b) => b.weight - a.weight).map((weightObj, idx) => {
             const urgencyVal = weightObj.weight;
-            let urgencyLabel = "STEADY ROTATION";
+            let urgencyLabel = "STEADY PACE";
             let urgencyColor = "text-[#3B82F6] bg-[#3B82F6]/10 border-[#3B82F6]/30";
-            let reasonStr = "Standard syllabus rotation pacing.";
+            let reasonStr = "Normal study sequence for syllabus completion.";
 
             if (urgencyVal >= 0.8) {
-              urgencyLabel = "CRITICAL GAP";
+              urgencyLabel = "NEEDS ATTENTION";
               urgencyColor = "text-danger bg-danger-light border-danger/35";
               reasonStr = weightObj.avoidance_flag 
-                ? "⚠️ Avoidance pattern detected: forced early peak zone."
-                : "🔥 Attention debt: long study staleness trigger.";
+                ? "You seem to be skipping this topic recently: study this first."
+                : "You have not studied this topic in a while: schedule a session.";
             } else if (urgencyVal >= 0.6) {
               urgencyLabel = "HIGH PRIORITY";
               urgencyColor = "text-warning bg-warning-light border-warning/35";
-              reasonStr = "⚡ Sectional concept coverage under target threshold.";
+              reasonStr = "Your focus on this section is below your target plan.";
             } else if (urgencyVal < 0.35) {
-              urgencyLabel = "SECURED MASTERY";
+              urgencyLabel = "WELL PREPARED";
               urgencyColor = "text-success bg-success-light border-success/35";
-              reasonStr = "✅ Mastery verified: revision intervals maximized master track.";
+              reasonStr = "You are doing great in this topic: keep it revised.";
             }
 
             let secBadge = "bg-[#3B82F6]/10 text-[#93C5FD] border border-[#3B82F6]/30";
