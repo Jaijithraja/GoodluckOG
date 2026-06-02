@@ -68,7 +68,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-bg-base text-text-primary flex flex-col md:flex-row select-none antialiased">
+    <div className="h-screen w-screen bg-bg-base text-text-primary flex flex-col md:flex-row select-none antialiased overflow-hidden">
       
       {/* Mobile Header */}
       <header className="md:hidden flex items-center justify-between px-6 py-4 bg-bg-surface border-b border-border z-30 sticky top-0 shadow-warm">
@@ -90,7 +90,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-[260px] bg-bg-surface border-r border-border p-6 min-h-screen justify-between shrink-0 sticky top-0 shadow-warm">
+      <aside className="hidden md:flex flex-col w-[260px] bg-bg-surface border-r border-border p-6 h-screen justify-between shrink-0 sticky top-0 shadow-warm overflow-y-auto">
         <div className="space-y-6">
           {/* Brand header */}
           <Link href="/today" className="block hover:opacity-90 transition-opacity">
@@ -245,7 +245,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main content body */}
-      <div className="flex-grow min-h-screen flex flex-col overflow-y-auto px-6 py-8 md:px-12 md:py-10 max-w-[1200px] mx-auto w-full">
+      <div className="flex-grow h-[calc(100vh-64px)] md:h-screen flex flex-col overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-10 max-w-[1200px] mx-auto w-full shrink-0">
         {children}
       </div>
 

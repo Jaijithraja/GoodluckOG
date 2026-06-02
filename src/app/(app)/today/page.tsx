@@ -439,7 +439,7 @@ export default function TodayPlanPage() {
           ==================================================================== */}
       {showLogger && activeSession && (
         <div className="fixed inset-0 bg-text-primary/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-[500px] bg-bg-elevated border border-accent/20 rounded-lg p-8 shadow-warmLg relative animate-fade-in">
+          <div className="w-full max-w-[500px] bg-bg-elevated border border-accent/20 rounded-lg p-5 sm:p-8 shadow-warmLg relative animate-fade-in max-h-[95vh] overflow-y-auto">
             <div className="absolute top-0 left-0 w-full h-[3px] bg-accent" />
 
             <div className="flex justify-between items-center mb-4">

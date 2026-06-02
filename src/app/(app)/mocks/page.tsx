@@ -69,7 +69,7 @@ export default function MocksPage() {
     <div className="space-y-8 max-w-[1000px] w-full animate-fade-in antialiased text-text-primary selection:bg-accent-light selection:text-accent-text">
       
       {/* Page Header */}
-      <div className="flex justify-between items-center border-b border-border pb-6">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-start md:items-center gap-4 border-b border-border pb-6">
         <div>
           <span className="text-[10px] font-mono tracking-widest text-text-secondary uppercase block mb-2 font-bold">
             AI MOCK DEBRIEF INTELLIGENCE
@@ -90,12 +90,12 @@ export default function MocksPage() {
 
       {/* 1. MOCK SCORE VISUAL PROGRESS */}
       {mockResults.length > 0 ? (
-        <div className="bg-bg-elevated border border-border rounded-lg p-6 shadow-warm">
+        <div className="bg-bg-elevated border border-border rounded-lg p-6 shadow-warm w-full overflow-hidden">
           <span className="font-mono text-[10px] text-text-secondary tracking-wider uppercase block mb-4 font-bold">
             Percentile Progress Trend
           </span>
 
-          <div className="h-[240px] w-full font-mono text-[10px]">
+          <div className="h-[240px] w-full overflow-hidden font-mono text-[10px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -247,7 +247,7 @@ export default function MocksPage() {
           ==================================================================== */}
       {showLogModal && (
         <div className="fixed inset-0 bg-text-primary/45 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-[500px] bg-bg-elevated border border-accent/20 rounded-lg p-8 shadow-warmLg relative animate-fade-in">
+          <div className="w-full max-w-[500px] bg-bg-elevated border border-accent/20 rounded-lg p-5 sm:p-8 shadow-warmLg relative animate-fade-in max-h-[95vh] overflow-y-auto">
             <div className="absolute top-0 left-0 w-full h-[3px] bg-accent" />
 
             <div className="flex justify-between items-center mb-6">

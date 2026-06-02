@@ -294,12 +294,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Weekly execution chart using Recharts */}
-        <div className="bg-bg-elevated border border-border rounded-lg p-6 md:col-span-2 shadow-warm">
+        <div className="bg-bg-elevated border border-border rounded-lg p-6 md:col-span-2 shadow-warm w-full overflow-hidden">
           <span className="font-mono text-[10px] text-text-secondary tracking-wider uppercase block mb-4 font-bold">
             Weekly Execution Pacing
           </span>
 
-          <div className="h-[180px] w-full font-mono text-[10px]">
+          <div className="h-[180px] w-full overflow-hidden font-mono text-[10px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

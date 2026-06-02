@@ -115,7 +115,7 @@ export default function WeeklyPage() {
       <div className="flex border-b border-border">
         <button
           onClick={() => setActiveTab("weekly_plan")}
-          className={`flex-1 py-3 text-xs font-mono font-black uppercase tracking-wider text-center border-b-2 cursor-pointer transition-all ${
+          className={`flex-1 py-3 text-[9px] sm:text-xs font-mono font-black uppercase tracking-wider sm:tracking-widest text-center border-b-2 cursor-pointer transition-all ${
             activeTab === "weekly_plan"
               ? "border-accent text-accent"
               : "border-transparent text-text-secondary hover:text-text-primary"
@@ -123,12 +123,12 @@ export default function WeeklyPage() {
         >
           <span className="flex items-center justify-center gap-1.5">
             <Calendar size={13} />
-            7-DAY STUDY BLUEPRINT
+            7-DAY BLUEPRINT
           </span>
         </button>
         <button
           onClick={() => setActiveTab("coaching")}
-          className={`flex-1 py-3 text-xs font-mono font-black uppercase tracking-wider text-center border-b-2 cursor-pointer transition-all ${
+          className={`flex-1 py-3 text-[9px] sm:text-xs font-mono font-black uppercase tracking-wider sm:tracking-widest text-center border-b-2 cursor-pointer transition-all ${
             activeTab === "coaching"
               ? "border-accent text-accent"
               : "border-transparent text-text-secondary hover:text-text-primary"
@@ -136,7 +136,7 @@ export default function WeeklyPage() {
         >
           <span className="flex items-center justify-center gap-1.5">
             <FileText size={13} />
-            AI DIAGNOSTIC REPORTS
+            DIAGNOSTIC REPORTS
           </span>
         </button>
       </div>

@@ -260,7 +260,7 @@ export default function OnboardingPage() {
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary mb-3 font-bold">
                   When do you focus best?
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
                     { id: "morning", label: "Morning", desc: "5am - 12pm" },
                     { id: "afternoon", label: "Afternoon", desc: "12pm - 6pm" },
@@ -304,7 +304,7 @@ export default function OnboardingPage() {
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary mb-3 font-bold">
                   Months into Preparation
                 </label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
                     { id: "fresh", label: "Fresh Start" },
                     { id: "1-3", label: "1-3 Months" },
@@ -390,16 +390,16 @@ export default function OnboardingPage() {
                       return (
                         <div
                           key={topic}
-                          className="flex items-center justify-between p-2.5 bg-bg-elevated rounded-md border border-border/40"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2.5 bg-bg-elevated rounded-md border border-border/40"
                         >
                           <span className="text-xs text-text-primary font-sans font-medium">{topic}</span>
-                          <div className="flex gap-1.5">
+                          <div className="flex gap-1 justify-start sm:justify-end w-full sm:w-auto shrink-0">
                             {(["weak", "average", "strong"] as const).map((r) => (
                               <button
                                 key={r}
                                 type="button"
                                 onClick={() => handleTopicRating(topic, r)}
-                                className={`text-[9px] font-mono px-2.5 py-1 rounded-md transition-all uppercase font-bold cursor-pointer ${
+                                className={`text-[8px] sm:text-[9px] font-mono px-2 py-1 sm:px-2.5 sm:py-1 rounded-md transition-all uppercase font-bold cursor-pointer ${
                                   rating === r
                                     ? r === "weak"
                                       ? "bg-danger text-white"
@@ -441,7 +441,7 @@ export default function OnboardingPage() {
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary mb-3 font-bold">
                   Daily Schedule Style
                 </label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
                     { id: "structured", label: "Structured Schedule", desc: "Clear hourly blocks for each subject." },
                     { id: "flexible", label: "Adaptive Fluid", desc: "Flexible focus slots that adapt to your day." },

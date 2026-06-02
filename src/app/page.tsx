@@ -392,7 +392,7 @@ export default function Home() {
             A SYSTEMATIC STUDY METHOD FOR CAT ASPIRANTS
           </span>
 
-          <h1 className="text-5xl sm:text-7.5xl font-display tracking-tight leading-tight text-text-primary font-extrabold max-w-[850px] uppercase">
+          <h1 className="text-3xl sm:text-5xl md:text-7.5xl font-display tracking-tight leading-tight text-text-primary font-extrabold max-w-[850px] uppercase">
             Crack CAT <br />
             Without Burning Out. <br />
             <span className="text-accent italic font-normal">Stay Consistent.</span>
