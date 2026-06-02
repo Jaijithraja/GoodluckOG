@@ -339,7 +339,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <section className="min-h-screen flex flex-col justify-center items-center px-6 pt-28 pb-16 relative overflow-hidden bg-bg-base border-b border-border">
+      <section className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 pt-28 pb-16 relative overflow-hidden bg-bg-base border-b border-border">
         {/* Subtle background grids */}
         <div className="absolute inset-0 pointer-events-none hero-grid-bg z-0" />
 
@@ -539,7 +539,7 @@ export default function Home() {
       {/* ─────────────────────────────────────────────
          4. CORE DIFFERENTIATOR FEATURES
          ───────────────────────────────────────────── */}
-      <section className="py-24 px-6 md:px-12 bg-bg-base border-b border-border" id="features">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 md:px-12 bg-bg-base border-b border-border" id="features">
         <div className="max-w-[1080px] mx-auto space-y-16">
           
           <div className="text-center space-y-3">
@@ -617,7 +617,7 @@ export default function Home() {
       {/* ─────────────────────────────────────────────
          5. BUILD YOUR WEEK RIGHT NOW (Interactive dark generator - Screenshot 2)
          ───────────────────────────────────────────── */}
-      <section className="py-24 px-6 md:px-12 bg-[#0A0A0A] text-white border-b border-[#1E1E1E]" id="week-plan">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 md:px-12 bg-[#0A0A0A] text-white border-b border-[#1E1E1E]" id="week-plan">
         <div className="max-w-[1080px] mx-auto space-y-12 text-center">
           
           <div className="space-y-3">
@@ -737,7 +737,7 @@ export default function Home() {
       {/* ─────────────────────────────────────────────
          6. BEFORE / AFTER COMPARISONS & COGNITIVE RISK QUIZ
          ───────────────────────────────────────────── */}
-      <section className="py-24 px-6 md:px-12 bg-bg-base border-b border-border" id="quiz">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 md:px-12 bg-bg-base border-b border-border" id="quiz">
         <div className="max-w-[700px] mx-auto space-y-12">
           
           <div className="text-center space-y-3">
@@ -801,17 +801,17 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex justify-center gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2 items-center">
                 <button
                   onClick={resetQuiz}
-                  className="text-[9px] font-mono text-text-secondary hover:text-text-primary uppercase tracking-widest border border-border-strong py-2.5 px-4 rounded-full transition-colors cursor-pointer bg-bg-base"
+                  className="w-full sm:w-auto text-[9px] font-mono text-text-secondary hover:text-text-primary uppercase tracking-widest border border-border-strong py-2.5 px-4 rounded-full transition-colors cursor-pointer bg-bg-base"
                 >
                   Retry Assessment
                 </button>
                 <Link
                   href={mounted && student && !student.isDemo ? "/dashboard" : "/onboarding"}
                   onClick={handleStartRealPlan}
-                  className="bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[9px] font-mono font-bold tracking-widest py-2.5 px-6 rounded-full uppercase transition-all text-center"
+                  className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[9px] font-mono font-bold tracking-widest py-2.5 px-6 rounded-full uppercase transition-all text-center"
                 >
                   {mounted && student && !student.isDemo ? "View My Study Plan" : "Get My Personalized Plan"}
                 </Link>
@@ -859,7 +859,7 @@ export default function Home() {
       {/* ─────────────────────────────────────────────
          7. SYSTEM INTERACTIVE CLOCK (Working Embedded Timer preview)
          ───────────────────────────────────────────── */}
-      <section className="py-24 px-6 md:px-12 bg-bg-base border-b border-border" id="preview">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 md:px-12 bg-bg-base border-b border-border" id="preview">
         <div className="max-w-[900px] mx-auto space-y-12">
           
           <div className="text-center space-y-3">
@@ -957,7 +957,7 @@ export default function Home() {
       {/* ─────────────────────────────────────────────
          8. FAQ ACCORDION Accordion list
          ───────────────────────────────────────────── */}
-      <section className="py-24 px-6 md:px-12 bg-bg-base border-b border-border" id="faq">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 md:px-12 bg-bg-base border-b border-border" id="faq">
         <div className="max-w-[700px] mx-auto space-y-12">
           
           <div className="text-center space-y-3">
@@ -1011,7 +1011,7 @@ export default function Home() {
       {/* ─────────────────────────────────────────────
          10. FINAL CALL TO ACTION (Dark background grid)
          ───────────────────────────────────────────── */}
-      <section className="bg-[#0A0A0A] py-32 px-6 md:px-12 border-b border-[#1F2937] text-center relative overflow-hidden text-white">
+      <section className="bg-[#0A0A0A] py-20 sm:py-32 px-4 sm:px-6 md:px-12 border-b border-[#1F2937] text-center relative overflow-hidden text-white">
         <div className="absolute inset-0 pointer-events-none grid-bg-dark opacity-30" />
 
         <div className="max-w-[700px] mx-auto space-y-8 relative z-10">
