@@ -1,0 +1,344 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Backgrounds */
+  --bg-base:       #0A0A0A;   /* deep near-black — page background */
+  --bg-surface:    #121212;   /* deep charcoal — sidebar, cards */
+  --bg-elevated:   #1C1C1E;   /* pure elevated charcoal — modal, active card */
+  --bg-sunken:     #1A1A1E;   /* pressed states, dividers */
+
+  /* Text */
+  --text-primary:  #F5F5F5;   /* secondary crisp off-white text */
+  --text-secondary:#9CA3AF;   /* soft muted gray text */
+  --text-tertiary: #4B5563;   /* hints, placeholders */
+
+  /* Accent — intense neon yellow urgency from Goodluck thesis */
+  --accent:        #E8FF47;   /* neon yellow primary actions, active states */
+  --accent-light:  rgba(232, 255, 71, 0.12); /* transparent yellow glow */
+  --accent-text:   #E8FF47;   /* neon yellow text on transparent bg */
+
+  /* Status */
+  --success:       #4ADE80;   /* modern mint green success */
+  --success-light: rgba(74, 222, 128, 0.12);
+  --warning:       #FB923C;   /* warning orange */
+  --warning-light: rgba(251, 146, 60, 0.12);
+  --danger:        #EF4444;   /* modern red */
+  --danger-light:  rgba(239, 68, 68, 0.12);
+  --info:          #E8FF47;   /* neon yellow info */
+  --info-light:    rgba(232, 255, 71, 0.12);
+
+  /* Section colors */
+  --varc:          #3B82F6;   /* calm blue */
+  --dilr:          #8B5CF6;   /* calm purple */
+  --quant:         #10B981;   /* calm green */
+
+  /* Borders */
+  --border:        #1F2937;   /* default border */
+  --border-strong: #374151;   /* hover/active border */
+
+  /* Sizing */
+  --radius-sm:     8px;
+  --radius-md:     12px;
+  --radius-lg:     18px;
+  --radius-xl:     26px;
+
+  /* Custom Glow and Grid variables */
+  --grid-line-color: rgba(232, 255, 71, 0.08);
+  --glow-color-1:    rgba(232, 255, 71, 0.22);
+  --glow-color-2:    rgba(232, 255, 71, 0.04);
+}
+
+[data-theme='light'] {
+  /* Backgrounds */
+  --bg-base:       #FAF8F5;   /* warm off-white — page background */
+  --bg-surface:    #F5F2ED;   /* slightly warmer — sidebar, cards */
+  --bg-elevated:   #FFFFFF;   /* pure white — modal, active card */
+  --bg-sunken:     #EDE9E3;   /* pressed states, dividers */
+
+  /* Text */
+  --text-primary:  #1C1916;   /* near-black warm */
+  --text-secondary:#6B6560;   /* muted warm gray */
+  --text-tertiary: #A39D97;   /* hints, placeholders */
+
+  /* Accent — refined gold-olive green for Light mode pairing Goodluck aesthetic */
+  --accent:        #5C661D;   /* deep olive gold */
+  --accent-light:  rgba(92, 102, 29, 0.08); /* olive tint */
+  --accent-text:   #3E4513;   /* dark olive text */
+
+  /* Status */
+  --success:       #3A7D5A;   /* muted green */
+  --success-light: #E8F5EE;
+  --warning:       #B5620E;   /* deep orange-amber */
+  --warning-light: #FEF3E6;
+  --danger:        #B54040;   /* muted red */
+  --danger-light:  #FDEDED;
+  --info:          #3B6B9E;   /* muted blue */
+  --info-light:    #EBF2FA;
+
+  /* Section colors */
+  --varc:          #5B7FA6;   /* calm blue */
+  --dilr:          #7A6FA0;   /* calm purple */
+  --quant:         #5E8A6E;   /* calm green */
+
+  /* Borders */
+  --border:        #E5E0D8;   /* default border */
+  --border-strong: #CEC8BF;   /* hover/active border */
+
+  /* Custom Glow and Grid variables for light mode */
+  --grid-line-color: rgba(92, 102, 29, 0.08);
+  --glow-color-1:    rgba(92, 102, 29, 0.14);
+  --glow-color-2:    rgba(92, 102, 29, 0.02);
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-sans), sans-serif;
+  }
+}
+
+/* Warm Shimmer Skeleton Animation */
+@keyframes warm-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #1A1A1E 25%, #242428 50%, #1A1A1E 75%);
+  background-size: 200% 100%;
+  animation: warm-shimmer 1.5s infinite linear;
+}
+
+[data-theme='light'] .shimmer {
+  background: linear-gradient(90deg, #EDE9E3 25%, #F5F2ED 50%, #EDE9E3 75%);
+}
+
+/* Bloomberg/Editorial Warm Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Subtle transitions for interactive components */
+.transition-calm {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─────────────────────────────────────────────
+   ELEVANA PREMIUM STYLE PACK
+   ───────────────────────────────────────────── */
+
+/* Floating animations for telemetry pills */
+@keyframes float-badge-a {
+  0%, 100% { transform: translateY(0) rotate(-2.5deg); }
+  50% { transform: translateY(-8px) rotate(-1.5deg); }
+}
+
+@keyframes float-badge-b {
+  0%, 100% { transform: translateY(0) rotate(2deg); }
+  50% { transform: translateY(-6px) rotate(3.5deg); }
+}
+
+.animate-float-a {
+  animation: float-badge-a 5s ease-in-out infinite;
+}
+
+.animate-float-b {
+  animation: float-badge-b 5.5s ease-in-out infinite;
+}
+
+/* Automated Scrolling Text Ticker */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.ticker-wrap {
+  overflow: hidden;
+  background: var(--text-primary);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 32s linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 36px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.28);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  height: 48px;
+}
+
+.ticker-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+/* Glowing primary action button */
+@keyframes cta-glow {
+  0%, 100% { box-shadow: 0 4px 18px rgba(232, 255, 71, 0.2); }
+  50% { box-shadow: 0 4px 28px rgba(232, 255, 71, 0.45), 0 0 0 6px rgba(232, 255, 71, 0.08); }
+}
+
+@keyframes cta-glow-light {
+  0%, 100% { box-shadow: 0 4px 18px rgba(92, 102, 29, 0.15); }
+  50% { box-shadow: 0 4px 28px rgba(92, 102, 29, 0.35), 0 0 0 6px rgba(92, 102, 29, 0.05); }
+}
+
+.animate-cta-glow {
+  animation: cta-glow 3s ease-in-out infinite;
+}
+
+[data-theme='light'] .animate-cta-glow {
+  animation: cta-glow-light 3s ease-in-out infinite;
+}
+
+/* Diagnostic dot pulse */
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+}
+
+.animate-dot-pulse {
+  animation: dot-pulse 1.8s ease-in-out infinite;
+}
+
+/* Background breathing glow */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50% { transform: scale(1.1); opacity: 0.75; }
+}
+
+.animate-breathe {
+  animation: breathe 8s ease-in-out infinite;
+}
+
+/* Scroll reveals */
+.reveal-visible {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.grid-bg-light {
+  background-image: linear-gradient(to right, rgba(28, 25, 22, 0.04) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(28, 25, 22, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.grid-bg-dark {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.hero-grid-bg {
+  background-image: 
+    linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+  background-size: 55px 55px;
+  background-position: center top;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 95%);
+}
+
+.hero-neon-glow {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 750px;
+  height: 650px;
+  background: radial-gradient(circle, var(--glow-color-1) 0%, var(--glow-color-2) 45%, transparent 75%);
+  filter: blur(85px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.9;
+  animation: float-glow 10s ease-in-out infinite alternate;
+}
+
+@keyframes float-glow {
+  0% {
+    transform: translate(-50%, -50%) scale(0.85) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05) rotate(4deg);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.95) rotate(-4deg);
+    opacity: 0.8;
+  }
+}
