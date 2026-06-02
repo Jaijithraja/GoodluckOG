@@ -81,7 +81,7 @@ export default function Home() {
 
   // 1. Fullscreen Loader States
   const [loaderProgress, setLoaderProgress] = useState(0);
-  const [loaderComplete, setLoaderComplete] = useState(false);
+  const [loaderComplete, setLoaderComplete] = useState(true);
 
   // 2. Interactive Quiz States
   const [quizStarted, setQuizStarted] = useState(false);
