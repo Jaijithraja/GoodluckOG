@@ -57,15 +57,92 @@ interface StudentState {
 }
 
 const DEFAULT_TOPICS = [
-  { topic: "Reading Comprehension", section: "VARC" },
-  { topic: "Verbal Ability (Para Jumbles, Odd One, Summary)", section: "VARC" },
-  { topic: "Easy Sets", section: "DILR" },
-  { topic: "Complex Sets", section: "DILR" },
-  { topic: "Arithmetic", section: "Quant" },
-  { topic: "Algebra", section: "Quant" },
-  { topic: "Geometry", section: "Quant" },
-  { topic: "PnC & Probability", section: "Quant" },
-  { topic: "Number Theory", section: "Quant" },
+  // VARC
+  { topic: "Verbal - RCs", section: "VARC", priority: "High" },
+  { topic: "Verbal - Non-RC questions", section: "VARC", priority: "Normal" },
+  { topic: "Verbal - Comprehension Session", section: "VARC", priority: "Normal" },
+  { topic: "Verbal - Reading Session @ Class", section: "VARC", priority: "Normal" },
+
+  // DILR
+  { topic: "DI - SuDoKu", section: "DILR", priority: "High" },
+  { topic: "DI - Sets - Solving", section: "DILR", priority: "High" },
+  { topic: "DI - Minima Maxima", section: "DILR", priority: "Normal" },
+
+  // Quant
+  { topic: "Arithmetics - Percentages Fractions Tables", section: "Quant", priority: "High" },
+  { topic: "Arithmetics - Percentages, Ratios and Proportions", section: "Quant", priority: "High" },
+  { topic: "Arithmetics - Averages (Basics)", section: "Quant", priority: "High" },
+  { topic: "Arithmetics - Weighted Average (Mixtures & Alligations)", section: "Quant", priority: "High" },
+  { topic: "Arithmetics - Profit & Loss", section: "Quant", priority: "High" },
+  { topic: "Arithmetics - SICI EMI", section: "Quant", priority: "High" },
+  { topic: "Arithmetics - Problem Solving", section: "Quant", priority: "High" },
+  { topic: "Numbers - Basics, Squares, Cubes, Primes, etc", section: "Quant", priority: "Normal" },
+  { topic: "Numbers - Basic Divisibility", section: "Quant", priority: "Normal" },
+  { topic: "Numbers - Base coversions", section: "Quant", priority: "Low" },
+  { topic: "Numbers - 1001 method", section: "Quant", priority: "Low" },
+  { topic: "Numbers - Chinese Remainder Theorem", section: "Quant", priority: "Low" },
+  { topic: "Numbers - Euler's, Wilsons Theorems", section: "Quant", priority: "Very Low" },
+  { topic: "Numbers - LCM, HCF, Factors, Prime Factorisation", section: "Quant", priority: "High" },
+  { topic: "Numbers - Factorials Factorisation", section: "Quant", priority: "Low" },
+  { topic: "Numbers - Last 1 digit", section: "Quant", priority: "Normal" },
+  { topic: "Numbers - Last 2 digits", section: "Quant", priority: "Very Low" },
+  { topic: "Numbers - Problem Solving", section: "Quant", priority: "Normal" },
+  { topic: "Speed Time - Linear Tracks", section: "Quant", priority: "Normal" },
+  { topic: "Speed Time - Trains and Platforms", section: "Quant", priority: "Normal" },
+  { topic: "Speed Time - Boat and Stream", section: "Quant", priority: "Normal" },
+  { topic: "Speed Time - Circular Tracks", section: "Quant", priority: "Normal" },
+  { topic: "Speed Time - Escalator", section: "Quant", priority: "Normal" },
+  { topic: "Speed Time - Time and Work", section: "Quant", priority: "High" },
+  { topic: "Speed Time - Problem Solving", section: "Quant", priority: "Normal" },
+  { topic: "Progressions - AP", section: "Quant", priority: "High" },
+  { topic: "Progressions - GP", section: "Quant", priority: "High" },
+  { topic: "Progressions - AM, GM, HM concepts", section: "Quant", priority: "High" },
+  { topic: "Progressions - Infinite GP", section: "Quant", priority: "High" },
+  { topic: "Progressions - Sum of n, n^2, n^3", section: "Quant", priority: "Normal" },
+  { topic: "Progressions - Combo (GPGP, APAP, APGP, 1/AP 1/AP)", section: "Quant", priority: "Normal" },
+  { topic: "Progressions - Common AP Series", section: "Quant", priority: "Normal" },
+  { topic: "Progressions - Problem Solving", section: "Quant", priority: "Normal" },
+  { topic: "Geometry - Lines and Angles", section: "Quant", priority: "Normal" },
+  { topic: "Geometry - Trigonometry Basics", section: "Quant", priority: "Normal" },
+  { topic: "Geometry - Triangle Classification", section: "Quant", priority: "Normal" },
+  { topic: "Geometry - Triangle Areas", section: "Quant", priority: "High" },
+  { topic: "Geometry - Triangle Similarities", section: "Quant", priority: "High" },
+  { topic: "Geometry - Triangle Lines and Properties", section: "Quant", priority: "High" },
+  { topic: "Geometry - Quadrilaterals", section: "Quant", priority: "Normal" },
+  { topic: "Geometry - Circles", section: "Quant", priority: "High" },
+  { topic: "Geometry - 3D Geometry", section: "Quant", priority: "Normal" },
+  { topic: "Geometry - Problem Solving", section: "Quant", priority: "Normal" },
+  { topic: "Equations - Linear Equations", section: "Quant", priority: "Normal" },
+  { topic: "Equations - Quadratic Equations", section: "Quant", priority: "Normal" },
+  { topic: "Equations - Slope", section: "Quant", priority: "Normal" },
+  { topic: "Equations - Coordinate Geometry Basics", section: "Quant", priority: "Normal" },
+  { topic: "Equations - Minima Maxima", section: "Quant", priority: "High" },
+  { topic: "Equations - Cubic Equations", section: "Quant", priority: "Normal" },
+  { topic: "Equations - Inequalities", section: "Quant", priority: "Normal" },
+  { topic: "Equations - Modulus", section: "Quant", priority: "Normal" },
+  { topic: "Equations - Logs & Exponentials", section: "Quant", priority: "High" },
+  { topic: "Equations - Problem Solving", section: "Quant", priority: "Normal" },
+  { topic: "P&C - Factorials", section: "Quant", priority: "Normal" },
+  { topic: "P&C - Arrangements - Linear & Circular", section: "Quant", priority: "Normal" },
+  { topic: "P&C - Arrangements - Constrained", section: "Quant", priority: "Low" },
+  { topic: "P&C - Selections - Basics", section: "Quant", priority: "Normal" },
+  { topic: "P&C - Selections Pascal's Triangle", section: "Quant", priority: "Normal" },
+  { topic: "P&C - Permutations", section: "Quant", priority: "Low" },
+  { topic: "P&C - Grouping", section: "Quant", priority: "Normal" },
+  { topic: "P&C - Application oriented questions", section: "Quant", priority: "High" },
+  { topic: "P&C - Probability - Basics", section: "Quant", priority: "Low" },
+  { topic: "P&C - Probability - Venn Diagram", section: "Quant", priority: "Low" },
+  { topic: "P&C - Probability - Condiional", section: "Quant", priority: "Low" },
+  { topic: "P&C - Problem Solving", section: "Quant", priority: "Normal" },
+  { topic: "Mock CAT - Pre Test Induction", section: "Quant", priority: "High" },
+  { topic: "Mock CAT - Test", section: "Quant", priority: "High" },
+  { topic: "Mock CAT - Post Test Analysis", section: "Quant", priority: "High" },
+  { topic: "Mock CAT - Live Mock - Sampath", section: "Quant", priority: "Normal" },
+  { topic: "General - CAT Induction", section: "Quant", priority: "Normal" },
+  { topic: "General - Doubt Clarification Session", section: "Quant", priority: "Normal" },
+  { topic: "General - Application Filling Demo", section: "Quant", priority: "High" },
+  { topic: "General - Group Discussion", section: "Quant", priority: "Normal" },
+  { topic: "General - Interview Preparations", section: "Quant", priority: "Normal" }
 ] as const;
 
 export const useStudentStore = create<StudentState>((set, get) => ({
@@ -110,13 +187,20 @@ export const useStudentStore = create<StudentState>((set, get) => ({
       pod_alert_opt_in: false,
     };
 
-    // Calculate baseline topic weights
+    // Calculate baseline topic weights based on priority values
+    const PRIORITY_TO_WEIGHT = {
+      "High": 0.85,
+      "Normal": 0.55,
+      "Low": 0.30,
+      "Very Low": 0.15,
+    };
+
     const newWeights: TopicWeight[] = DEFAULT_TOPICS.map((t, idx) => ({
       id: `weight-${idx}`,
       student_id: studentId,
       topic: t.topic,
       section: t.section as Section,
-      weight: 0.5,
+      weight: PRIORITY_TO_WEIGHT[t.priority] || 0.5,
       coverage_percent: 15,
       revision_count: 0,
       last_studied: undefined,
@@ -1222,8 +1306,16 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     };
 
     // 2. Generate customized topic weights with randomized coverage & revision count
+    const PRIORITY_TO_WEIGHT = {
+      "High": 0.85,
+      "Normal": 0.55,
+      "Low": 0.30,
+      "Very Low": 0.15,
+    };
     const demoWeights: TopicWeight[] = DEFAULT_TOPICS.map((t, idx) => {
-      const baseWeight = 0.4 + Math.random() * 0.45;
+      const baseWeight = PRIORITY_TO_WEIGHT[t.priority] || 0.55;
+      const weightNoise = (Math.random() - 0.5) * 0.15;
+      const finalWeight = Math.min(1.0, Math.max(0.1, baseWeight + weightNoise));
       const coverage = Math.floor(25 + Math.random() * 55);
       const revisions = Math.floor(Math.random() * 4);
       return {
@@ -1231,7 +1323,7 @@ export const useStudentStore = create<StudentState>((set, get) => ({
         student_id: studentId,
         topic: t.topic,
         section: t.section as Section,
-        weight: Number(baseWeight.toFixed(2)),
+        weight: Number(finalWeight.toFixed(2)),
         coverage_percent: coverage,
         revision_count: revisions,
         last_studied: new Date(Date.now() - Math.floor(Math.random() * 5) * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
