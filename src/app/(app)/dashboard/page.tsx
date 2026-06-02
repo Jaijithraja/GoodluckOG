@@ -341,6 +341,12 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-3">
+            {student.burnout_risk_score >= 0.5 && student.burnout_risk_score < 0.8 && (
+              <div className="text-[9px] text-[#F59E0B] font-mono bg-[#F59E0B]/10 border border-[#F59E0B]/20 p-2.5 rounded leading-relaxed uppercase animate-fade-in">
+                ⚠️ Fatigue rising. Click below to schedule a proactive recovery session.
+              </div>
+            )}
+
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${student.burnout_risk_score >= 0.75 ? "bg-danger animate-ping" : "bg-success"}`} />
               <span className="text-[10px] font-mono text-text-secondary uppercase font-bold">
@@ -430,6 +436,29 @@ export default function DashboardPage() {
           <span className="font-mono text-[10px] text-text-secondary tracking-wider uppercase block mb-4 font-bold">
             Avoidance Watchlist
           </span>
+
+          {/* Sectional Balance Alert */}
+          {(() => {
+            const varcTopics = topicWeights.filter(t => t.section === "VARC");
+            const dilrTopics = topicWeights.filter(t => t.section === "DILR");
+            const quantTopics = topicWeights.filter(t => t.section === "Quant");
+            const varcAvg = varcTopics.length > 0 ? Math.round(varcTopics.reduce((acc, t) => acc + t.coverage_percent, 0) / varcTopics.length) : 0;
+            const dilrAvg = dilrTopics.length > 0 ? Math.round(dilrTopics.reduce((acc, t) => acc + t.coverage_percent, 0) / dilrTopics.length) : 0;
+            const quantAvg = quantTopics.length > 0 ? Math.round(quantTopics.reduce((acc, t) => acc + t.coverage_percent, 0) / quantTopics.length) : 0;
+            const maxAvg = Math.max(varcAvg, dilrAvg, quantAvg);
+            const minAvg = Math.min(varcAvg, dilrAvg, quantAvg);
+            const skewAmount = maxAvg - minAvg;
+            const isSkewed = skewAmount > 25;
+
+            if (isSkewed) {
+              return (
+                <div className="bg-danger-light border border-danger/20 rounded-md p-3 text-[9px] font-mono text-danger uppercase mb-4 leading-relaxed animate-fade-in">
+                  ⚠️ Sectional Imbalance: Coverage ranges from {minAvg}% to {maxAvg}%. Study priorities have shifted to pull up lagging sections.
+                </div>
+              );
+            }
+            return null;
+          })()}
 
           <div className="space-y-4">
             {topicWeights.slice(0, 5).map((tw) => (

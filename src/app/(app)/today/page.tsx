@@ -19,6 +19,7 @@ export default function TodayPlanPage() {
   const logSession = useStudentStore((state) => state.logSession);
   const topicWeights = useStudentStore((state) => state.topicWeights);
   const adjustTopicWeight = useStudentStore((state) => state.adjustTopicWeight);
+  const weeklyReports = useStudentStore((state) => state.weeklyReports);
 
   // Local component states
   const [activeSession, setActiveSession] = useState<PlannedSession | null>(null);
@@ -28,6 +29,8 @@ export default function TodayPlanPage() {
   const [pageLoading, setPageLoading] = useState(true);
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [avoidanceApplied, setAvoidanceApplied] = useState(false);
+  const [commitmentChecked, setCommitmentChecked] = useState(false);
 
   // Focus Timer Local State
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -248,6 +251,7 @@ export default function TodayPlanPage() {
     setTimerSeconds(session.duration_minutes * 60);
     setIsTimerRunning(false);
     setTimerTab("timer");
+    setCommitmentChecked(false);
     setShowLogger(true);
   };
 
@@ -326,6 +330,17 @@ export default function TodayPlanPage() {
         </div>
       </div>
 
+      {/* Weekly One-Change Sync Banner */}
+      {weeklyReports && weeklyReports.length > 0 && weeklyReports[0].narrative?.one_change && (
+        <div className="bg-[#4ADE80]/5 border border-[#4ADE80]/20 rounded-lg p-4 flex items-start gap-3 shadow-sm text-xs font-sans animate-fade-in">
+          <Brain size={16} className="text-accent stroke-[2] mt-0.5" />
+          <div className="space-y-0.5">
+            <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest font-bold block">This Week&apos;s Focal Sync</span>
+            <p className="text-text-primary leading-relaxed">{weeklyReports[0].narrative.one_change}</p>
+          </div>
+        </div>
+      )}
+
       {/* Dynamic Alerts Strip */}
       {activePlan && activePlan.dynamic_alerts && activePlan.dynamic_alerts.length > 0 && (
         <div className="space-y-2.5">
@@ -376,6 +391,51 @@ export default function TodayPlanPage() {
 
         {/* Sessions list */}
         <div className="space-y-4">
+          {(() => {
+            const avoidedTopics = topicWeights.filter((tw) => tw.weight >= 0.8 || tw.avoidance_flag);
+            if (avoidedTopics.length > 0 && !avoidanceApplied) {
+              const matchedSession = activePlan?.sessions.find(s => s.topic === avoidedTopics[0].topic && s.duration_minutes > 15);
+              if (matchedSession) {
+                return (
+                  <div className="bg-[#FEF3E6]/10 border border-warning/30 rounded-lg p-5 space-y-3 animate-fade-in">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[9px] font-black text-warning bg-warning/10 border border-warning/25 px-2 py-0.5 rounded-badge tracking-widest uppercase flex items-center gap-1">
+                        <Zap size={9} className="stroke-[2.5]" />
+                        Study Avoidance Watchpoint
+                      </span>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed font-sans">
+                      You have skipped or avoided <span className="text-text-primary font-bold">{avoidedTopics[0].topic}</span> recently. Let&apos;s make starting easier by swapping this block for a low-pressure <span className="text-text-primary font-bold">15-minute concept review warmup</span>.
+                    </p>
+                    <button
+                      onClick={() => {
+                        const updatedSessions = activePlan.sessions.map((s) => {
+                          if (s.topic === avoidedTopics[0].topic) {
+                            return {
+                              ...s,
+                              duration_minutes: 15,
+                              session_type: "Practice" as const,
+                              rationale: "Scaled down dynamically to break study avoidance friction."
+                            };
+                          }
+                          return s;
+                        });
+                        activePlan.sessions = updatedSessions;
+                        setAvoidanceApplied(true);
+                        setToastMessage("Warmup applied! Planned block scaled to 15m.");
+                        setTimeout(() => setToastMessage(""), 4000);
+                      }}
+                      className="bg-warning text-[#0A0A0A] hover:bg-warning/90 text-[10px] font-mono font-black tracking-widest py-2.5 px-4 rounded-md uppercase transition-all cursor-pointer block w-fit"
+                    >
+                      Apply 15-Min Warmup
+                    </button>
+                  </div>
+                );
+              }
+            }
+            return null;
+          })()}
+
           {activePlan?.sessions && activePlan.sessions.length > 0 ? (
             activePlan.sessions.map((session, idx) => {
               const isLogged = sessionLogs.some(
@@ -625,6 +685,29 @@ export default function TodayPlanPage() {
                   MANUAL LOG
                 </span>
               </button>
+            </div>
+
+            {/* Micro-Habit Focus Commitment Hook */}
+            <div className={`p-4 rounded-md border text-xs font-sans transition-all duration-300 mb-6 ${
+              commitmentChecked 
+                ? "bg-accent/10 border-accent/30 text-text-primary animate-pulse-subtle" 
+                : "bg-bg-surface border-border text-text-secondary"
+            }`}>
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="micro-habit-commitment"
+                  checked={commitmentChecked}
+                  onChange={(e) => setCommitmentChecked(e.target.checked)}
+                  className="mt-0.5 accent-accent h-4 w-4 rounded cursor-pointer"
+                />
+                <label htmlFor="micro-habit-commitment" className="cursor-pointer select-none leading-relaxed">
+                  <span className="font-mono text-[9px] font-black uppercase tracking-widest block mb-0.5 text-text-primary">
+                    ⚡️ Micro-Habit Focus Commitment
+                  </span>
+                  I will put my phone in another room or turn on Do Not Disturb for this entire session.
+                </label>
+              </div>
             </div>
 
             {/* TAB 1: Pomodoro / StopWatch Circular Focus Timer */}
