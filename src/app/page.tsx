@@ -60,6 +60,22 @@ export default function Home() {
   const router = useRouter();
   const loadFromLocalStorage = useStudentStore((state) => state.loadFromLocalStorage);
   const student = useStudentStore((state) => state.student);
+  const generateMockupData = useStudentStore((state) => state.generateMockupData);
+  const clearDemoData = useStudentStore((state) => state.clearDemoData);
+
+  const handleSeeHowItWorks = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await generateMockupData();
+    router.push("/dashboard");
+  };
+
+  const handleStartRealPlan = async (e: React.MouseEvent) => {
+    if (student && student.isDemo) {
+      e.preventDefault();
+      await clearDemoData();
+      router.push("/onboarding");
+    }
+  };
 
   const [mounted, setMounted] = useState(false);
 
@@ -163,19 +179,9 @@ export default function Home() {
     const activeTheme = document.documentElement.getAttribute("data-theme") || "dark";
     setTheme(activeTheme as any);
 
-    // Loader interval simulation
-    const interval = setInterval(() => {
-      setLoaderProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => setLoaderComplete(true), 300);
-          return 100;
-        }
-        return prev + Math.floor(Math.random() * 15) + 5;
-      });
-    }, 80);
-
-    return () => clearInterval(interval);
+    // Skip loader immediately for instant paint
+    setLoaderProgress(100);
+    setLoaderComplete(true);
   }, [loadFromLocalStorage, generateWeekPlanData]);
 
   // Pomodoro Timer tick logic
@@ -328,7 +334,7 @@ export default function Home() {
             href={mounted && student ? "/dashboard" : "/onboarding"} 
             className="bg-text-primary hover:bg-text-primary/90 text-bg-base text-[10px] font-mono font-bold tracking-widest py-2.5 px-6 rounded-full transition-all uppercase"
           >
-            {mounted && student ? "My Dashboard" : "Start My Plan"}
+            {mounted && student ? (student.isDemo ? "Dashboard (Mockup)" : "My Dashboard") : "Start My Plan"}
           </Link>
         </div>
       </nav>
@@ -402,19 +408,40 @@ export default function Home() {
             AI builds your study plan, tracks your consistency, and helps you stay on track until exam day. Build a daily habit that gets you into your dream B-school.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-2">
-            <Link
-              href={mounted && student ? "/dashboard" : "/onboarding"}
-              className="bg-accent text-[#0A0A0A] text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase shadow-md animate-cta-glow cursor-pointer"
-            >
-              {mounted && student ? "Resume My Plan" : "Start My CAT Plan"}
-            </Link>
-            <Link
-              href="/dashboard"
-              className="border border-border-strong hover:border-text-primary text-text-primary text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase bg-bg-surface/60 hover:bg-bg-surface"
-            >
-              {mounted && student ? "My Dashboard" : "See How It Works"}
-            </Link>
+          <div className="flex flex-col sm:flex-row gap-4 pt-2 items-center">
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Link
+                href={mounted && student && !student.isDemo ? "/dashboard" : "/onboarding"}
+                onClick={handleStartRealPlan}
+                className="bg-accent text-[#0A0A0A] text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase shadow-md animate-cta-glow cursor-pointer text-center"
+              >
+                {mounted && student && !student.isDemo ? "Resume My Plan" : "Start My CAT Plan"}
+              </Link>
+              {mounted && student && !student.isDemo ? (
+                <Link
+                  href="/dashboard"
+                  className="border border-border-strong hover:border-text-primary text-text-primary text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase bg-bg-surface/60 hover:bg-bg-surface text-center"
+                >
+                  My Dashboard
+                </Link>
+              ) : (
+                <button
+                  onClick={handleSeeHowItWorks}
+                  className="border border-border-strong hover:border-text-primary text-text-primary text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase bg-bg-surface/60 hover:bg-bg-surface cursor-pointer"
+                >
+                  See How It Works
+                </button>
+              )}
+            </div>
+            
+            {(!student || student.isDemo) && (
+              <Link
+                href="/onboarding"
+                className="text-xs font-mono text-text-secondary hover:text-accent tracking-wider font-bold transition-colors mt-2 sm:mt-0 underline sm:no-underline"
+              >
+                Try it live →
+              </Link>
+            )}
           </div>
 
           {/* Social Proof avatars */}
@@ -426,7 +453,7 @@ export default function Home() {
               <div className="w-8 h-8 rounded-full border-2 border-bg-base bg-dilr text-[10px] flex items-center justify-center font-bold text-white">P</div>
             </div>
             <span className="text-[10px] font-mono text-text-secondary tracking-wider uppercase font-bold">
-              100+ serious CAT aspirants building consistency
+              Built for CAT 2026 aspirants
             </span>
           </div>
 
@@ -693,10 +720,11 @@ export default function Home() {
                   This is an interactive preview. The real Goodluck adapts this daily based on your logs.
                 </span>
                 <Link
-                  href={mounted && student ? "/dashboard" : "/onboarding"}
+                  href={mounted && student && !student.isDemo ? "/dashboard" : "/onboarding"}
+                  onClick={handleStartRealPlan}
                   className="bg-white hover:bg-white/90 text-black text-[10px] font-mono font-black py-3.5 px-8 rounded-full transition-all uppercase tracking-wider text-center"
                 >
-                  {mounted && student ? "View My Study Plan" : "Get my actual plan"}
+                  {mounted && student && !student.isDemo ? "View My Study Plan" : "Get my actual plan"}
                 </Link>
               </div>
             </div>
@@ -781,10 +809,11 @@ export default function Home() {
                   Retry Assessment
                 </button>
                 <Link
-                  href={mounted && student ? "/dashboard" : "/onboarding"}
+                  href={mounted && student && !student.isDemo ? "/dashboard" : "/onboarding"}
+                  onClick={handleStartRealPlan}
                   className="bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[9px] font-mono font-bold tracking-widest py-2.5 px-6 rounded-full uppercase transition-all text-center"
                 >
-                  {mounted && student ? "View My Study Plan" : "Get My Personalized Plan"}
+                  {mounted && student && !student.isDemo ? "View My Study Plan" : "Get My Personalized Plan"}
                 </Link>
               </div>
             </div>
@@ -998,10 +1027,11 @@ export default function Home() {
 
           <div className="flex justify-center pt-4">
             <Link
-              href={mounted && student ? "/dashboard" : "/onboarding"}
+              href={mounted && student && !student.isDemo ? "/dashboard" : "/onboarding"}
+              onClick={handleStartRealPlan}
               className="bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[11px] font-mono font-bold tracking-widest py-4 px-10 rounded-full uppercase transition-all shadow-md animate-cta-glow cursor-pointer"
             >
-              {mounted && student ? "Continue My Preparation" : "Start Preparing Today"}
+              {mounted && student && !student.isDemo ? "Continue My Preparation" : "Start Preparing Today"}
             </Link>
           </div>
         </div>
@@ -1011,7 +1041,7 @@ export default function Home() {
          11. FOOTER
          ───────────────────────────────────────────── */}
       <footer className="border-t border-border bg-bg-surface text-left py-16 px-6 md:px-12 antialiased text-text-primary">
-        <div className="max-w-[1080px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="max-w-[1080px] mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
           
           <div className="space-y-4">
             <GoodluckLogo size={28} showTagline={false} />
@@ -1039,17 +1069,6 @@ export default function Home() {
               <li><span>Peer Accountability</span></li>
               <li><span>Progress Analytics</span></li>
               <li><span>Weekly Schedule</span></li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h4 className="text-[10px] font-mono text-text-tertiary uppercase tracking-widest font-black">
-              Integrations
-            </h4>
-            <ul className="space-y-2 text-[11px] font-mono text-text-secondary uppercase tracking-wider list-none font-bold p-0 m-0">
-              <li><span>Supabase database</span></li>
-              <li><span>Anthropic AI</span></li>
-              <li><span>Zustand store</span></li>
             </ul>
           </div>
 

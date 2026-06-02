@@ -1,51 +1,112 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useStudentStore } from "@/store/studentStore";
-import { Sparkles, Calendar, Settings, CheckCircle2, User, RefreshCw, AlertCircle } from "lucide-react";
+import { Sparkles, Calendar, Settings, CheckCircle2, User, RefreshCw, AlertCircle, RotateCcw } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function SettingsPage() {
+  const router = useRouter();
+
   // Zustand selectors
   const student = useStudentStore((state) => state.student);
   const topicWeights = useStudentStore((state) => state.topicWeights);
   const setStudentProfile = useStudentStore((state) => state.setStudentProfile);
 
   // Component states
-  const [name, setName] = useState(student?.name || "");
-  const [examDate, setExamDate] = useState(student?.exam_date || "2026-11-29");
-  const [weekdayHours, setWeekdayHours] = useState(student?.available_hours_weekday || 3);
-  const [weekendHours, setWeekendHours] = useState(student?.available_hours_weekend || 6);
-  const [peakEnergy, setPeakEnergy] = useState(student?.peak_energy_window || "morning");
-  const [studyStyle, setStudyStyle] = useState(student?.study_style || "structured");
+  const [name, setName] = useState("");
+  const [examDate, setExamDate] = useState("2026-11-29");
+  const [weekdayHours, setWeekdayHours] = useState(3);
+  const [weekendHours, setWeekendHours] = useState(6);
+  const [peakEnergy, setPeakEnergy] = useState("morning");
+  const [studyStyle, setStudyStyle] = useState("structured");
   
+  const [pageLoading, setPageLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState("");
 
-  if (!student) {
+  useEffect(() => {
+    const checkUserAndOnboarding = async () => {
+      const sessionRes = await supabase.auth.getSession();
+      const user = sessionRes.data.session?.user;
+
+      if (!user) {
+        if (student && student.isDemo) {
+          setName(student.name);
+          setExamDate(student.exam_date);
+          setWeekdayHours(student.available_hours_weekday);
+          setWeekendHours(student.available_hours_weekend);
+          setPeakEnergy(student.peak_energy_window);
+          setStudyStyle(student.study_style);
+          setPageLoading(false);
+          return;
+        }
+        router.push("/login");
+        return;
+      }
+
+      const { data: stdData } = await supabase
+        .from("students")
+        .select()
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!stdData) {
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!stdData.onboarding_complete) {
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!student || student.id !== stdData.id) {
+        await useStudentStore.getState().loadFromSupabase();
+      }
+
+      const currentStudent = useStudentStore.getState().student;
+      if (currentStudent) {
+        setName(currentStudent.name);
+        setExamDate(currentStudent.exam_date);
+        setWeekdayHours(currentStudent.available_hours_weekday);
+        setWeekendHours(currentStudent.available_hours_weekend);
+        setPeakEnergy(currentStudent.peak_energy_window);
+        setStudyStyle(currentStudent.study_style);
+      }
+
+      setPageLoading(false);
+    };
+
+    checkUserAndOnboarding();
+  }, [student, router]);
+
+  if (pageLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 antialiased bg-bg-base text-text-primary">
-        <RefreshCw className="animate-spin text-accent" size={24} />
-        <span className="font-mono text-xs text-text-secondary uppercase">Loading configuration panels...</span>
+        <RotateCcw className="animate-spin text-accent" size={24} />
+        <span className="font-mono text-xs text-text-secondary uppercase tracking-widest">Loading settings...</span>
       </div>
     );
   }
 
-  const handleProfileSave = (e: React.FormEvent) => {
+  const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStudentProfile({
+    await setStudentProfile({
       name,
       exam_date: examDate,
-      target_percentile: student.target_percentile,
+      target_percentile: student!.target_percentile,
       available_hours_weekday: weekdayHours,
       available_hours_weekend: weekendHours,
       peak_energy_window: peakEnergy as any,
       study_style: studyStyle as any,
-      biggest_fear: student.biggest_fear || "",
-      archetype: student.archetype || "Balanced",
+      biggest_fear: student!.biggest_fear || "",
+      archetype: student!.archetype || "Balanced",
       onboarding_complete: true,
-      dreamIIM: student.dreamIIM || "A",
+      dreamIIM: student!.dreamIIM || "A",
     });
 
-    setToastMessage("Settings updated. Planning schedules adapted.");
+    setToastMessage("Settings saved successfully.");
     setTimeout(() => setToastMessage(""), 4000);
   };
 
@@ -63,7 +124,7 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="border-b border-border pb-6">
         <span className="text-[10px] font-mono tracking-widest text-text-secondary uppercase block mb-2 font-bold">
-          SYSTEM PARAMETERS & CALIBRATIONS
+          Manage your preferences
         </span>
         <h1 className="font-display font-medium text-3xl tracking-wide text-text-primary">
           Settings
@@ -77,7 +138,7 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2 border-b border-border pb-4">
             <Settings className="text-accent stroke-[2]" size={20} />
             <h3 className="font-display font-bold text-base text-text-primary uppercase tracking-wide">
-              Profile Parameters
+              Study preferences
             </h3>
           </div>
 
@@ -112,7 +173,7 @@ export default function SettingsPage() {
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-[10px] font-mono uppercase tracking-wider text-text-secondary font-bold">
-                    Weekday Hours
+                    Weekday Hours Available
                   </label>
                   <span className="font-mono text-xs font-black text-accent">{weekdayHours} hrs</span>
                 </div>
@@ -130,7 +191,7 @@ export default function SettingsPage() {
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-[10px] font-mono uppercase tracking-wider text-text-secondary font-bold">
-                    Weekend Hours
+                    Weekend Hours Available
                   </label>
                   <span className="font-mono text-xs font-black text-accent">{weekendHours} hrs</span>
                 </div>
@@ -149,7 +210,7 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary mb-2 font-bold">
-                  Peak Cognitive Energy Window
+                  When is your energy highest?
                 </label>
                 <select
                   value={peakEnergy}
@@ -164,15 +225,15 @@ export default function SettingsPage() {
 
               <div>
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary mb-2 font-bold">
-                  Micro-deadlines Strictness
+                  Planning style
                 </label>
                 <select
                   value={studyStyle}
                   onChange={(e) => setStudyStyle(e.target.value as any)}
                   className="w-full bg-bg-surface border border-border text-text-primary text-sm rounded-md py-2.5 px-3 focus:outline-none focus:border-accent"
                 >
-                  <option value="structured">Structured (micro-milestones)</option>
-                  <option value="flexible">Adaptive Fluid (fluid recovery)</option>
+                  <option value="structured">Structured (fixed duration study blocks)</option>
+                  <option value="flexible">Flexible (fluid blocks and recovery days)</option>
                 </select>
               </div>
             </div>
@@ -181,7 +242,7 @@ export default function SettingsPage() {
               type="submit"
               className="bg-accent hover:bg-accent/90 text-[#0A0A0A] text-xs font-mono font-black py-3.5 px-8 rounded-md cursor-pointer transition-all uppercase tracking-wider block shadow-sm hover:shadow"
             >
-              Save Profile Adjustments
+              Save settings
             </button>
           </form>
         </div>

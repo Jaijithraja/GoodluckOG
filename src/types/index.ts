@@ -28,6 +28,7 @@ export interface Student {
   updated_at: string
   dreamIIM?: string
   days_remaining?: number
+  isDemo?: boolean
 }
 
 export interface TopicWeight {

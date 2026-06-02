@@ -181,7 +181,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center mb-6">
           <GoodluckLogo size={36} showTagline={false} className="mb-2" />
           <p className="text-[10px] text-text-secondary text-center font-mono uppercase tracking-widest font-black">
-            CAT PREPARATION COGNITIVE BACKBONE
+            STAY CONSISTENT, CRACK CAT
           </p>
         </div>
 

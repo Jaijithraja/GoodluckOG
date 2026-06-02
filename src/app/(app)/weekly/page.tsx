@@ -1,30 +1,86 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStudentStore } from "@/store/studentStore";
 import { WeeklyNarrative } from "@/types";
-import { Sparkles, Calendar, BookOpen, AlertCircle, FileText, CheckCircle2, ChevronRight, Activity, Clock, Sliders } from "lucide-react";
+import { Sparkles, Calendar, BookOpen, AlertCircle, FileText, CheckCircle2, ChevronRight, Activity, Clock, Sliders, RotateCcw } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function WeeklyPage() {
+  const router = useRouter();
   const student = useStudentStore((state) => state.student);
   const weeklyReports = useStudentStore((state) => state.weeklyReports);
   const generateWeeklyReport = useStudentStore((state) => state.generateWeeklyReport);
   const topicWeights = useStudentStore((state) => state.topicWeights);
 
-  const [activeTab, setActiveTab] = useState<"coaching" | "weekly_plan">("weekly_plan");
+  const [activeTab, setActiveTab] = useState<"coaching" | "weekly_plan" | "loading">("weekly_plan");
+  const [pageLoading, setPageLoading] = useState(true);
+  const [generatingReport, setGeneratingReport] = useState(false);
+
+  useEffect(() => {
+    const checkUserAndOnboarding = async () => {
+      const sessionRes = await supabase.auth.getSession();
+      const user = sessionRes.data.session?.user;
+
+      if (!user) {
+        if (student && student.isDemo) {
+          setPageLoading(false);
+          return;
+        }
+        router.push("/login");
+        return;
+      }
+
+      const { data: stdData } = await supabase
+        .from("students")
+        .select()
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!stdData) {
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!stdData.onboarding_complete) {
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!student || student.id !== stdData.id) {
+        await useStudentStore.getState().loadFromSupabase();
+      }
+
+      setPageLoading(false);
+    };
+
+    checkUserAndOnboarding();
+  }, [student, router]);
 
   useEffect(() => {
     // Generate an initial weekly report if there are none, to populate UI beautifully
-    if (student && weeklyReports.length === 0) {
+    if (student && weeklyReports.length === 0 && !pageLoading) {
       generateWeeklyReport();
     }
-  }, [student, weeklyReports, generateWeeklyReport]);
+  }, [student, weeklyReports, generateWeeklyReport, pageLoading]);
 
-  if (!student) {
+  const handleGenerateReport = async () => {
+    setGeneratingReport(true);
+    try {
+      await generateWeeklyReport();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setGeneratingReport(false);
+    }
+  };
+
+  if (pageLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 antialiased bg-bg-base text-text-primary">
-        <Activity className="animate-spin text-accent" size={24} />
-        <span className="font-mono text-xs text-text-secondary uppercase">Compiling weekly coach profiles...</span>
+        <RotateCcw className="animate-spin text-accent" size={24} />
+        <span className="font-mono text-xs text-text-secondary uppercase tracking-widest">Loading coaching report...</span>
       </div>
     );
   }
@@ -48,8 +104,8 @@ export default function WeeklyPage() {
     const isWeekend = [0, 6].includes(nextDay.getDay());
     
     const hours = isWeekend 
-      ? Number(student.available_hours_weekend || 4) 
-      : Number(student.available_hours_weekday || 2);
+      ? Number(student!.available_hours_weekend || 4) 
+      : Number(student!.available_hours_weekday || 2);
       
     const sessionCount = hours >= 3 ? 2 : 1;
     const assignedSessions = [];
@@ -59,11 +115,11 @@ export default function WeeklyPage() {
       const topicObj = prioritizedTopics[topicIdx] || { topic: "Reading Comprehension", section: "VARC", weight: 0.5 };
       
       let sType = "Practice";
-      if (student.prep_phase === "Foundation") {
+      if (student!.prep_phase === "Foundation") {
         sType = s === 0 ? "Learn" : "Practice";
-      } else if (student.prep_phase === "Acceleration") {
+      } else if (student!.prep_phase === "Acceleration") {
         sType = s === 0 ? "Practice" : "Revise";
-      } else if (student.prep_phase === "Crunch") {
+      } else if (student!.prep_phase === "Crunch") {
         sType = s === 0 ? "Revise" : "Practice";
       } else {
         sType = s === 0 ? "Revise" : "Recovery";
@@ -94,7 +150,7 @@ export default function WeeklyPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-6">
         <div>
           <span className="text-[10px] font-mono tracking-widest text-text-secondary uppercase block mb-2 font-bold font-sans">
-            ADAPTIVE COCKPIT SCHEDULING
+            7-Day Schedule & Analysis
           </span>
           <h1 className="font-display font-medium text-3xl tracking-tight text-text-primary">
             Weekly Coaching
@@ -103,10 +159,18 @@ export default function WeeklyPage() {
 
         {activeTab === "coaching" && (
           <button
-            onClick={() => generateWeeklyReport()}
-            className="border border-accent/40 hover:bg-accent-light text-accent text-xs font-mono font-bold py-2.5 px-6 rounded-md transition-all cursor-pointer uppercase tracking-wider shadow-sm"
+            onClick={handleGenerateReport}
+            className="border border-accent/40 hover:bg-accent-light text-accent text-xs font-mono font-bold py-2.5 px-6 rounded-md transition-all cursor-pointer uppercase tracking-wider shadow-sm flex items-center gap-1.5"
+            disabled={generatingReport}
           >
-            GENERATE THIS WEEK&apos;S REPORT
+            {generatingReport ? (
+              <>
+                <RotateCcw className="animate-spin" size={13} />
+                <span>GENERATING...</span>
+              </>
+            ) : (
+              <span>GENERATE THIS WEEK&apos;S REPORT</span>
+            )}
           </button>
         )}
       </div>
@@ -123,7 +187,7 @@ export default function WeeklyPage() {
         >
           <span className="flex items-center justify-center gap-1.5">
             <Calendar size={13} />
-            7-DAY BLUEPRINT
+            7-DAY SCHEDULE
           </span>
         </button>
         <button
@@ -136,7 +200,7 @@ export default function WeeklyPage() {
         >
           <span className="flex items-center justify-center gap-1.5">
             <FileText size={13} />
-            DIAGNOSTIC REPORTS
+            WEEKLY REPORTS
           </span>
         </button>
       </div>

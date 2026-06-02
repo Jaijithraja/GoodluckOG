@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useStudentStore } from "@/store/studentStore";
 import { supabase } from "@/lib/supabase/client";
-import { Sparkles, UserCheck, ShieldAlert, Award, Send, Users, CheckCircle2, User, X } from "lucide-react";
+import { Sparkles, UserCheck, ShieldAlert, Award, Send, Users, CheckCircle2, User, X, RotateCcw } from "lucide-react";
 
 export default function PodPage() {
+  const router = useRouter();
+
   // Zustand selectors
   const student = useStudentStore((state) => state.student);
   const podMembers = useStudentStore((state) => state.podMembers);
@@ -13,6 +16,11 @@ export default function PodPage() {
   const podCheckin = useStudentStore((state) => state.podCheckin);
   const optInPod = useStudentStore((state) => state.optInPod);
   const submitPodCheckin = useStudentStore((state) => state.submitPodCheckin);
+
+  const [pageLoading, setPageLoading] = useState(true);
+  const [win, setWin] = useState("");
+  const [struggle, setStruggle] = useState("");
+  const [error, setError] = useState("");
 
   // Live Supabase Realtime subscription
   useEffect(() => {
@@ -41,20 +49,64 @@ export default function PodPage() {
     };
   }, [student]);
 
-  // Component states
-  const [win, setWin] = useState("");
-  const [struggle, setStruggle] = useState("");
-  const [error, setError] = useState("");
+  useEffect(() => {
+    const checkUserAndOnboarding = async () => {
+      const sessionRes = await supabase.auth.getSession();
+      const user = sessionRes.data.session?.user;
+
+      if (!user) {
+        if (student && student.isDemo) {
+          setPageLoading(false);
+          return;
+        }
+        router.push("/login");
+        return;
+      }
+
+      const { data: stdData } = await supabase
+        .from("students")
+        .select()
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!stdData) {
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!stdData.onboarding_complete) {
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!student || student.id !== stdData.id) {
+        await useStudentStore.getState().loadFromSupabase();
+      }
+
+      setPageLoading(false);
+    };
+
+    checkUserAndOnboarding();
+  }, [student, router]);
 
   const handleCheckinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!win || !struggle) {
-      setError("Please describe both your weekly win and your execution struggle.");
+      setError("Please describe both your weekly win and your struggle.");
       return;
     }
     submitPodCheckin(win, struggle);
     setError("");
   };
+
+  if (pageLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 antialiased bg-bg-base text-text-primary">
+        <RotateCcw className="animate-spin text-accent" size={24} />
+        <span className="font-mono text-xs text-text-secondary uppercase tracking-widest">Loading your pod...</span>
+      </div>
+    );
+  }
 
   // If student hasn't joined a pod, render opt-in onboarding card
   if (!podJoined) {
@@ -74,11 +126,11 @@ export default function PodPage() {
               Join Accountability Pod
             </h2>
             <p className="font-mono text-[9px] text-accent tracking-widest uppercase font-bold">
-              Silent Peer pod matches (3-5 members)
+              Silent peer matches (3-5 members)
             </p>
           </div>
 
-          <p className="text-sm text-text-secondary leading-relaxed font-sans max-w-[450px] mx-auto">
+          <p className="text-sm text-text-secondary leading-relaxed font-sans max-w-[450px] mx-auto font-sans">
             Pods are completely silent. No chat distractions. No toxic ranks. 
             You only see each other&apos;s showing up status—whether you completed planned sessions today or missed them. Silent peer pressure that keeps you consistent.
           </p>
@@ -87,7 +139,7 @@ export default function PodPage() {
             onClick={() => optInPod(true)}
             className="bg-accent hover:bg-accent/90 text-[#0A0A0A] text-xs font-mono font-black tracking-widest py-3.5 px-8 rounded-md cursor-pointer transition-all uppercase shadow-sm hover:shadow"
           >
-            Match into Delta-99 Pod
+            Match with Peers
           </button>
         </div>
       </div>
@@ -100,7 +152,7 @@ export default function PodPage() {
       {/* Page Header */}
       <div className="border-b border-border pb-6">
         <span className="text-[10px] font-mono tracking-widest text-text-secondary uppercase block mb-2 font-bold">
-          SILENT PEER COGNITIVE SYNC
+          Silent Peer Accountability
         </span>
         <h1 className="font-display font-medium text-3xl tracking-tight text-text-primary">
           Accountability Pod
@@ -214,7 +266,7 @@ export default function PodPage() {
                 type="submit"
                 className="w-full bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[10px] font-mono font-black py-3 rounded-md flex items-center justify-center gap-1.5 transition-all cursor-pointer uppercase tracking-widest mt-4 shadow-sm hover:shadow"
               >
-                <span>Synchronize Pod Status</span>
+                <span>Submit check-in</span>
                 <Send size={12} className="stroke-[2.5]" />
               </button>
             </form>

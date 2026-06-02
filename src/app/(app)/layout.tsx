@@ -149,7 +149,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {student && (
           <div className="pt-6 border-t border-border flex flex-col gap-4">
             <div>
-              <div className="text-xs font-mono font-bold text-text-primary truncate">{student.name}</div>
+              <div className="flex items-center gap-2">
+                <div className="text-xs font-mono font-bold text-text-primary truncate">{student.name}</div>
+                {student.isDemo && (
+                  <span className="bg-[#FEF3E6]/10 border border-warning/30 text-warning text-[7px] font-mono font-black uppercase px-1 rounded animate-pulse">
+                    MOCKUP
+                  </span>
+                )}
+              </div>
               <div className="flex gap-2 items-center mt-1.5">
                 <span className="bg-accent-light border border-accent/20 text-accent-text text-[8px] font-mono font-black uppercase px-1.5 py-0.5 rounded-badge">
                   {student.prep_phase}
@@ -213,7 +220,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="pt-6 border-t border-border flex flex-col gap-4">
               <div className="flex justify-between items-center">
                 <div>
-                  <div className="text-sm font-bold text-text-primary font-mono">{student.name}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm font-bold text-text-primary font-mono">{student.name}</div>
+                    {student.isDemo && (
+                      <span className="bg-[#FEF3E6]/10 border border-warning/30 text-warning text-[7px] font-mono font-black uppercase px-1 rounded animate-pulse">
+                        MOCKUP
+                      </span>
+                    )}
+                  </div>
                   <div className="text-[10px] text-text-secondary font-mono">TARGET IIM {student.dreamIIM}</div>
                 </div>
                 

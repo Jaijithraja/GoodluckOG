@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStudentStore } from "@/store/studentStore";
-import { Sparkles, Calendar, Flame, Target, AlertTriangle, Play, CheckCircle2, RotateCcw, ShieldAlert, TrendingUp } from "lucide-react";
+import { Sparkles, Calendar, Flame, Target, AlertTriangle, AlertCircle, Play, CheckCircle2, RotateCcw, ShieldAlert, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { supabase } from "@/lib/supabase/client";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -17,21 +18,59 @@ export default function DashboardPage() {
   const adaptationLogs = useStudentStore((state) => state.adaptationLogs);
   const manualRecovery = useStudentStore((state) => state.manualRecovery);
   const setDaysRemaining = useStudentStore((state) => state.setDaysRemaining);
+  const generateMockupData = useStudentStore((state) => state.generateMockupData);
+  const clearDemoData = useStudentStore((state) => state.clearDemoData);
 
   // Care Layer AI states
   const [burnoutMessage, setBurnoutMessage] = useState("");
   const [burnoutLoading, setBurnoutLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [toastMessage, setToastMessage] = useState("");
 
   useEffect(() => {
-    if (student && !student.onboarding_complete) {
-      router.push("/onboarding");
-    }
+    const checkUserAndOnboarding = async () => {
+      const sessionRes = await supabase.auth.getSession();
+      const user = sessionRes.data.session?.user;
+
+      if (!user) {
+        if (student && student.isDemo) {
+          setPageLoading(false);
+          return;
+        }
+        router.push("/login");
+        return;
+      }
+
+      const { data: stdData } = await supabase
+        .from("students")
+        .select()
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!stdData) {
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!stdData.onboarding_complete) {
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!student || student.id !== stdData.id) {
+        await useStudentStore.getState().loadFromSupabase();
+      }
+
+      setPageLoading(false);
+    };
+
+    checkUserAndOnboarding();
   }, [student, router]);
 
   useEffect(() => {
     // Fetch live custom support coaching text from Claude API route if burnout risk is high
     const getBurnoutMessage = async () => {
-      if (!student || student.id === "student-123" || student.burnout_risk_score < 0.6) return;
+      if (!student || student.isDemo || student.burnout_risk_score < 0.6) return;
       setBurnoutLoading(true);
       try {
         const response = await fetch('/api/burnout-message', {
@@ -55,11 +94,26 @@ export default function DashboardPage() {
     getBurnoutMessage();
   }, [student]);
 
-  if (!student) {
+  if (pageLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 antialiased bg-bg-base text-text-primary">
         <RotateCcw className="animate-spin text-accent" size={24} />
-        <span className="font-mono text-xs text-text-secondary uppercase">Compiling dashboard data...</span>
+        <span className="font-mono text-xs text-text-secondary uppercase">Loading dashboard...</span>
+      </div>
+    );
+  }
+
+  if (!student) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 antialiased bg-bg-base text-text-primary">
+        <AlertCircle className="text-danger" size={32} />
+        <span className="font-sans text-sm text-text-secondary">Please complete your onboarding profile to view dashboard.</span>
+        <button
+          onClick={() => router.push("/onboarding")}
+          className="bg-accent text-[#0A0A0A] text-xs font-mono font-bold tracking-widest py-2 px-4 rounded"
+        >
+          GO TO ONBOARDING
+        </button>
       </div>
     );
   }
@@ -114,6 +168,51 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 max-w-[1000px] w-full animate-fade-in antialiased text-text-primary selection:bg-accent-light selection:text-accent-text">
       
+      {/* Toast Alert popup */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-bg-elevated border border-success/30 text-success text-xs font-mono py-3.5 px-6 rounded-md shadow-warmLg flex items-center gap-3 animate-slide-in">
+          <CheckCircle2 size={16} className="text-success" />
+          <span>{toastMessage.toUpperCase()}</span>
+        </div>
+      )}
+
+      {/* 0. MOCKUP MODE GLASSMORPHIC BANNER */}
+      {student.isDemo && (
+        <div className="bg-[#FEF3E6]/10 border border-warning/30 rounded-lg p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-warm animate-fade-in backdrop-blur-sm">
+          <div className="space-y-1">
+            <span className="font-mono text-[9px] font-black text-warning tracking-widest uppercase flex items-center gap-1.5">
+              <Sparkles size={10} className="stroke-[2.5]" />
+              MOCKUP DEMO ACTIVE
+            </span>
+            <p className="text-xs text-text-secondary leading-relaxed font-sans">
+              You are exploring simulated habit timelines and weekly targets for <span className="text-text-primary font-bold">{student.name}</span>.
+            </p>
+          </div>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                await generateMockupData();
+                setToastMessage("Fresh mockup timeline generated!");
+                setTimeout(() => setToastMessage(""), 3000);
+              }}
+              className="bg-accent hover:bg-accent/90 text-[#0A0A0A] text-[10px] font-mono font-bold tracking-wider py-1.5 px-4 rounded-md uppercase transition-all cursor-pointer"
+            >
+              🔄 Get New Mockup Plan
+            </button>
+            <button
+              onClick={async () => {
+                await clearDemoData();
+                router.push("/onboarding");
+              }}
+              className="border border-[#F59E0B]/40 hover:bg-[#F59E0B]/10 text-warning text-[10px] font-mono font-bold tracking-wider py-1.5 px-4 rounded-md uppercase transition-colors cursor-pointer"
+            >
+              🚀 Start Real Plan
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 1. SIMULATION CONTROLS */}
       <div className="bg-bg-surface border border-dashed border-accent/40 rounded-lg p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>

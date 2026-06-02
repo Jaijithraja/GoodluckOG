@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useStudentStore } from "@/store/studentStore";
 import { MockSource, MockDebrief } from "@/types";
-import { Sparkles, Calendar, PlusCircle, Award, CheckCircle2, ChevronRight, BarChart2, AlertCircle, X } from "lucide-react";
+import { Sparkles, Calendar, PlusCircle, Award, CheckCircle2, ChevronRight, BarChart2, AlertCircle, X, RotateCcw } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { supabase } from "@/lib/supabase/client";
 
 export default function MocksPage() {
+  const router = useRouter();
+
   // Zustand store selectors
   const student = useStudentStore((state) => state.student);
   const mockResults = useStudentStore((state) => state.mockResults);
@@ -16,6 +20,8 @@ export default function MocksPage() {
   const [showLogModal, setShowLogModal] = useState(false);
   const [activeDebriefIdx, setActiveDebriefIdx] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const [pageLoading, setPageLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     source: "SimCAT" as MockSource,
@@ -28,32 +34,82 @@ export default function MocksPage() {
     quant_score: 18,
   });
 
-  const handleMockSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const checkUserAndOnboarding = async () => {
+      const sessionRes = await supabase.auth.getSession();
+      const user = sessionRes.data.session?.user;
+
+      if (!user) {
+        if (student && student.isDemo) {
+          setPageLoading(false);
+          return;
+        }
+        router.push("/login");
+        return;
+      }
+
+      const { data: stdData } = await supabase
+        .from("students")
+        .select()
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!stdData) {
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!stdData.onboarding_complete) {
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!student || student.id !== stdData.id) {
+        await useStudentStore.getState().loadFromSupabase();
+      }
+
+      setPageLoading(false);
+    };
+
+    checkUserAndOnboarding();
+  }, [student, router]);
+
+  const handleMockSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.overall_percentile < 50 || form.overall_percentile > 100) {
       setError("Please input a realistic overall percentile score.");
       return;
     }
 
-    logMockResult({
-      mock_date: new Date().toISOString().split("T")[0],
-      source: form.source,
-      overall_percentile: form.overall_percentile,
-      varc_score: form.varc_score,
-      varc_percentile: form.varc_percentile,
-      dilr_score: form.dilr_score,
-      dilr_percentile: form.dilr_percentile,
-      quant_score: form.quant_score,
-      quant_percentile: form.quant_percentile,
-      varc_time_minutes: 40,
-      dilr_time_minutes: 40,
-      quant_time_minutes: 40,
-      total_attempts: 75,
-      total_accuracy: 78.5,
-    });
-
-    setShowLogModal(false);
+    setSubmitting(true);
     setError("");
+
+    try {
+      await logMockResult({
+        mock_date: new Date().toISOString().split("T")[0],
+        source: form.source,
+        overall_percentile: form.overall_percentile,
+        varc_score: form.varc_score,
+        varc_percentile: form.varc_percentile,
+        dilr_score: form.dilr_score,
+        dilr_percentile: form.dilr_percentile,
+        quant_score: form.quant_score,
+        quant_percentile: form.quant_percentile,
+        varc_time_minutes: 40,
+        dilr_time_minutes: 40,
+        quant_time_minutes: 40,
+        total_attempts: 75,
+        total_accuracy: 0.78,
+      });
+
+      setShowLogModal(false);
+      setActiveDebriefIdx(0); // Automatically expand the newly logged mock
+    } catch (err) {
+      console.error(err);
+      setError("Unable to analyze mock scores. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Format Recharts data (reverse results order so it draws progress sequentially)
@@ -65,6 +121,17 @@ export default function MocksPage() {
     Quant: mock.quant_percentile,
   }));
 
+  if (pageLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 antialiased bg-bg-base text-text-primary">
+        <RotateCcw className="animate-spin text-accent" size={24} />
+        <span className="font-mono text-xs text-text-secondary uppercase tracking-widest">
+          Loading mock analytics...
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 max-w-[1000px] w-full animate-fade-in antialiased text-text-primary selection:bg-accent-light selection:text-accent-text">
       
@@ -72,7 +139,7 @@ export default function MocksPage() {
       <div className="flex flex-col sm:flex-row justify-between sm:items-start md:items-center gap-4 border-b border-border pb-6">
         <div>
           <span className="text-[10px] font-mono tracking-widest text-text-secondary uppercase block mb-2 font-bold">
-            AI MOCK DEBRIEF INTELLIGENCE
+            Mock Analysis & Coaching
           </span>
           <h1 className="font-display font-medium text-3xl tracking-wide text-text-primary">
             Mock Analytics
@@ -114,12 +181,12 @@ export default function MocksPage() {
       ) : (
         <div className="text-center p-12 bg-bg-elevated border border-dashed border-border rounded-lg font-mono text-xs text-text-secondary uppercase space-y-4 shadow-sm">
           <BarChart2 size={36} className="mx-auto text-text-secondary/40 animate-pulse" />
-          <p>No Mock results currently registered in system memory.</p>
+          <p>No mocks logged yet.</p>
           <button
             onClick={() => setShowLogModal(true)}
             className="border border-accent/40 hover:bg-accent-light text-accent-text font-black py-2.5 px-5 rounded-md tracking-widest uppercase text-[10px] mx-auto block cursor-pointer transition-all"
           >
-            Seed Test Results Now
+            Log your first mock →
           </button>
         </div>
       )}
@@ -218,7 +285,7 @@ export default function MocksPage() {
                       {debrief.plan_adjustment && (
                         <div className="bg-bg-surface border border-border rounded-md p-4 text-xs font-sans">
                           <span className="font-mono text-[9px] text-accent uppercase tracking-wider font-black block mb-1">
-                            Plan Adjustment Actioned
+                            Plan Adjustment Applied
                           </span>
                           <p className="text-text-secondary leading-relaxed">{debrief.plan_adjustment}</p>
                         </div>
@@ -228,7 +295,7 @@ export default function MocksPage() {
                       {debrief.choke_risk && debrief.choke_note && (
                         <div className="bg-warning-light border border-warning/20 rounded-md p-4 text-xs font-sans">
                           <span className="font-mono text-[9px] text-warning uppercase tracking-wider font-black block mb-1">
-                            Cognitive Choke Watchlist
+                            Performance Watchpoint
                           </span>
                           <p className="text-warning leading-relaxed">{debrief.choke_note}</p>
                         </div>
@@ -247,19 +314,35 @@ export default function MocksPage() {
           ==================================================================== */}
       {showLogModal && (
         <div className="fixed inset-0 bg-text-primary/45 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-[500px] bg-bg-elevated border border-accent/20 rounded-lg p-5 sm:p-8 shadow-warmLg relative animate-fade-in max-h-[95vh] overflow-y-auto">
+          <div className="w-full max-w-[500px] bg-bg-elevated border border-accent/20 rounded-lg p-5 sm:p-8 shadow-warmLg relative animate-fade-in max-h-[95vh] overflow-y-auto overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-[3px] bg-accent" />
+
+            {/* Submitting Loading Overlay */}
+            {submitting && (
+              <div className="absolute inset-0 bg-bg-elevated/95 z-50 flex flex-col items-center justify-center p-6 text-center space-y-4 animate-fade-in">
+                <RotateCcw className="animate-spin text-accent" size={32} />
+                <div>
+                  <h4 className="font-display font-bold text-base text-text-primary uppercase tracking-wider">
+                    Analyzing Your Mock
+                  </h4>
+                  <p className="text-xs text-text-secondary mt-1 max-w-[280px] mx-auto font-sans leading-relaxed">
+                    Our AI is evaluating your sectional percentiles to balance and recalibrate your study plan.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2.5">
                 <Award size={20} className="text-accent" />
                 <h3 className="font-display font-bold text-lg text-text-primary uppercase tracking-wider">
-                  LOG MOCK EXAM RESULTS
+                  LOG YOUR MOCK RESULT
                 </h3>
               </div>
               <button
                 onClick={() => setShowLogModal(false)}
                 className="text-text-secondary hover:text-text-primary cursor-pointer transition-colors"
+                disabled={submitting}
               >
                 <X size={20} />
               </button>
@@ -311,7 +394,7 @@ export default function MocksPage() {
 
               <div className="h-[1px] bg-border my-4" />
               <h5 className="text-[10px] font-mono uppercase tracking-wider text-text-secondary mb-3 font-bold">
-                Sectional Percentile Scores
+                Sectional Percentiles
               </h5>
 
               <div className="grid grid-cols-3 gap-3">
@@ -365,7 +448,7 @@ export default function MocksPage() {
                 type="submit"
                 className="w-full bg-accent hover:bg-accent/90 text-[#0A0A0A] text-xs font-mono font-black py-3.5 rounded-md flex items-center justify-center gap-1.5 transition-all cursor-pointer uppercase tracking-widest mt-6 shadow-sm hover:shadow"
               >
-                <span>Synchronize Mock Debrief</span>
+                <span>Save mock and analyze</span>
                 <CheckCircle2 size={14} className="stroke-[2.5]" />
               </button>
             </form>

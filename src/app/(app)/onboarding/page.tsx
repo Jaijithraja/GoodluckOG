@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStudentStore } from "@/store/studentStore";
-import { Target, Clock, Activity, BookOpen, Heart, ArrowRight, ArrowLeft, Sparkles, CheckCircle2 } from "lucide-react";
+import { Target, Clock, Activity, BookOpen, Heart, ArrowRight, ArrowLeft, Sparkles, CheckCircle2, RotateCcw } from "lucide-react";
 import { PrepPhase, Section } from "@/types";
 import GoodluckLogo from "@/components/GoodluckLogo";
+import { supabase } from "@/lib/supabase/client";
 
 const SECTIONS = {
   VARC: ["Reading Comprehension", "Verbal Ability (Para Jumbles, Odd One, Summary)"],
@@ -16,6 +17,10 @@ const SECTIONS = {
 export default function OnboardingPage() {
   const router = useRouter();
   const setStudentProfile = useStudentStore((state) => state.setStudentProfile);
+  const clearDemoData = useStudentStore((state) => state.clearDemoData);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -44,44 +49,137 @@ export default function OnboardingPage() {
     }));
   };
 
-  const handleSubmit = () => {
-    // Save to Zustand
-    setStudentProfile({
-      name: formData.name || "Aspirant",
-      exam_date: formData.examDate,
-      target_percentile: formData.targetPercentile,
-      available_hours_weekday: formData.weekdayHours,
-      available_hours_weekend: formData.weekendHours,
-      peak_energy_window: formData.peakEnergy,
-      study_style: formData.studyStyle,
-      biggest_fear: formData.biggestFear,
-      archetype: "Balanced",
-      onboarding_complete: true,
-      dreamIIM: formData.dreamIIM,
-    });
+  const computePhase = (examDateStr: string): PrepPhase => {
+    const examDate = new Date(examDateStr);
+    const today = new Date();
+    examDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    const daysRemaining = Math.max(0, Math.ceil((examDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+    if (daysRemaining < 7) return "FinalWeek";
+    if (daysRemaining < 60) return "Crunch";
+    if (daysRemaining < 180) return "Acceleration";
+    return "Foundation";
+  };
 
-    // Seed mock score if entered
-    if (formData.hasMockScore && formData.lastMockScore) {
-      const scoreVal = parseFloat(formData.lastMockScore);
-      useStudentStore.getState().logMockResult({
-        mock_date: new Date().toISOString().split("T")[0],
-        source: "Other", // V2 valid MockSource enum
-        overall_percentile: scoreVal,
-        varc_score: Math.round(scoreVal * 0.3),
-        varc_percentile: Math.min(99.9, Math.max(50, scoreVal + 1)),
-        dilr_score: Math.round(scoreVal * 0.25),
-        dilr_percentile: Math.min(99.9, Math.max(50, scoreVal - 2)),
-        quant_score: Math.round(scoreVal * 0.2),
-        quant_percentile: Math.min(99.9, Math.max(50, scoreVal + 1)),
-        varc_time_minutes: 40,
-        dilr_time_minutes: 40,
-        quant_time_minutes: 40,
-        total_attempts: 75,
-        total_accuracy: 78.5,
-      });
+  const RATING_TO_WEIGHT = {
+    weak: 0.8,
+    average: 0.5,
+    strong: 0.3,
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      // Clean up any demo state before starting real onboarding
+      await clearDemoData();
+
+      const sessionRes = await supabase.auth.getSession();
+      const user = sessionRes.data.session?.user;
+
+      if (!user) {
+        setError("You must be logged in to save your study plan.");
+        setLoading(false);
+        return;
+      }
+
+      // 1. Insert students record
+      const { data: student, error: sErr } = await supabase
+        .from("students")
+        .insert({
+          user_id: user.id,
+          name: formData.name || "Aspirant",
+          exam_date: formData.examDate,
+          target_percentile: formData.targetPercentile,
+          available_hours_weekday: formData.weekdayHours,
+          available_hours_weekend: formData.weekendHours,
+          peak_energy_window: formData.peakEnergy,
+          study_style: formData.studyStyle,
+          biggest_fear: formData.biggestFear,
+          prep_phase: computePhase(formData.examDate),
+          onboarding_complete: false, // set true after plan generates
+          dreamIIM: formData.dreamIIM,
+        })
+        .select()
+        .single();
+
+      if (sErr) {
+        console.error("Student insert error:", sErr);
+        setError("Failed to save your profile. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // 2. Insert all 9 topic_weights using rating from Step 4
+      const CAT_TOPICS = Object.entries(SECTIONS).flatMap(([section, topics]) =>
+        topics.map((topic) => ({
+          student_id: student.id,
+          topic,
+          section: section as Section,
+          weight: RATING_TO_WEIGHT[formData.topics[topic] || "average"],
+          coverage_percent: 0,
+          revision_count: 0,
+          avoidance_flag: false,
+        }))
+      );
+
+      const { error: twErr } = await supabase.from("topic_weights").insert(CAT_TOPICS);
+      if (twErr) {
+        console.error("Topic weights insert error:", twErr);
+      }
+
+      // 3. If mock scores entered in Step 3: insert mock_results
+      if (formData.hasMockScore && formData.lastMockScore) {
+        const scoreVal = parseFloat(formData.lastMockScore);
+        const { error: mrErr } = await supabase.from("mock_results").insert({
+          student_id: student.id,
+          mock_date: new Date().toISOString().split("T")[0],
+          source: "Other",
+          overall_percentile: scoreVal,
+          varc_percentile: Math.min(99.9, Math.max(50, scoreVal + 1)),
+          dilr_percentile: Math.min(99.9, Math.max(50, scoreVal - 2)),
+          quant_percentile: Math.min(99.9, Math.max(50, scoreVal + 1)),
+          varc_score: Math.round(scoreVal * 0.3),
+          dilr_score: Math.round(scoreVal * 0.25),
+          quant_score: Math.round(scoreVal * 0.2),
+          varc_time_minutes: 40,
+          dilr_time_minutes: 40,
+          quant_time_minutes: 40,
+          total_attempts: 75,
+          total_accuracy: 78.5,
+        });
+        if (mrErr) {
+          console.error("Mock result insert error:", mrErr);
+        }
+      }
+
+      // 4. Call generate-plan Supabase edge function
+      try {
+        const { data: plan, error: pErr } = await supabase.functions.invoke("generate-plan", {
+          body: { student_id: student.id },
+        });
+        if (pErr) {
+          console.error("Plan generation failed:", pErr);
+        }
+      } catch (err) {
+        console.error("Edge function invocation failed:", err);
+      }
+
+      // 5. Mark onboarding complete
+      await supabase.from("students").update({ onboarding_complete: true }).eq("id", student.id);
+
+      // Force a reload of student store state to ensure it is synchronized
+      await useStudentStore.getState().loadFromLocalStorage();
+
+      // 6. Redirect to today
+      router.push("/today");
+    } catch (err) {
+      console.error("Onboarding submit failed:", err);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    router.push("/dashboard");
   };
 
   const totalSteps = 5;
@@ -92,9 +190,35 @@ export default function OnboardingPage() {
       {/* Background Calm Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1F2937_1px,transparent_1px),linear-gradient(to_bottom,#1F2937_1px,transparent_1px)] bg-[size:40px_40px] opacity-25 pointer-events-none" />
 
+      {/* Fullscreen Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-[#0A0A0A]/95 z-[9999] flex flex-col justify-center items-center px-8 transition-opacity duration-500 ease-out select-none">
+          <div className="max-w-[400px] w-full space-y-6 text-center animate-fade-in">
+            <div className="flex justify-center">
+              <RotateCcw className="animate-spin text-accent" size={32} />
+            </div>
+            <div className="space-y-2">
+              <h2 className="font-display font-medium text-lg text-text-primary tracking-wide">
+                Building your plan...
+              </h2>
+              <p className="text-xs font-mono text-text-secondary uppercase tracking-widest leading-relaxed">
+                Gemini is reading your profile and calibrating topic weights...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main card */}
       <div className="w-full max-w-[700px] bg-bg-elevated border border-border rounded-lg p-8 md:p-12 shadow-warm relative overflow-hidden animate-fade-in">
         <div className="absolute top-0 left-0 w-full h-[3px] bg-accent" />
+
+        {error && (
+          <div className="mb-6 p-4 bg-danger-light border border-danger/20 text-danger-text rounded-md text-xs font-mono flex items-center gap-2">
+            <span>⚠</span>
+            <span>{error}</span>
+          </div>
+        )}
 
         {step < 6 && (
           <>

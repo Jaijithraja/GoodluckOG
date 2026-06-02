@@ -14,7 +14,8 @@ import {
   Section,
   SessionType,
   MockDebrief,
-  WeeklyNarrative
+  WeeklyNarrative,
+  MockSource
 } from "@/types";
 
 export interface PodMember {
@@ -51,6 +52,8 @@ interface StudentState {
   adjustTopicWeight: (topic: string, newWeight: number) => Promise<void>;
   loadFromLocalStorage: () => Promise<void>;
   loadFromSupabase: () => Promise<void>;
+  generateMockupData: () => Promise<void>;
+  clearDemoData: () => Promise<void>;
 }
 
 const DEFAULT_TOPICS = [
@@ -1149,212 +1152,344 @@ export const useStudentStore = create<StudentState>((set, get) => ({
         console.error("Failed to load local storage", err);
       }
     } else {
-      // Seed rich default demo data to wow first-time visitors who click "See How It Works"
-      const defaultStudent: Student = {
-        id: "student-123",
-        user_id: "user-123",
-        name: "Demo Scholar",
-        exam_date: "2026-11-29",
-        target_percentile: 99.5,
-        available_hours_weekday: 3.5,
-        available_hours_weekend: 7,
-        peak_energy_window: "night",
-        study_style: "structured",
-        biggest_fear: "Losing motivation mid-prep",
-        archetype: "CONSISTENT-ACHIEVER",
-        prep_phase: "Acceleration",
-        burnout_risk_score: 0.15,
-        onboarding_complete: true,
-        pod_alert_opt_in: false,
-        dreamIIM: "A",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+      // Do NOT automatically seed anything, keep student as null for clean onboarding!
+      set({
+        student: null,
+        topicWeights: [],
+        dailyPlans: [],
+        sessionLogs: [],
+        mockResults: [],
+        adaptationLogs: [],
+        burnoutScores: [],
+        weeklyReports: [],
+        podMembers: [],
+        podJoined: false,
+        podCheckin: null,
+      });
+    }
+  },
 
-      const defaultWeights: TopicWeight[] = DEFAULT_TOPICS.map((t, idx) => ({
-        id: `weight-${idx}`,
-        student_id: "student-123",
+  generateMockupData: async () => {
+    // 1. Choose randomized profile values
+    const names = [
+      "Sneha Nair", "Aarav Mehta", "Ishaan Roy", "Ananya Verma", 
+      "Kabir Malhotra", "Diya Sengupta", "Aditya Joshi", "Meera Iyer",
+      "Rohan Deshmukh", "Priyanka Sen"
+    ];
+    const targetIIMs = ["A", "B", "C", "A & B", "Any Top IIM"];
+    const fears = [
+      "Losing motivation mid-prep",
+      "Quant algebra complexity",
+      "VARC score volatility under time pressure",
+      "DILR arrangement sets locking my score progress"
+    ];
+    const archetypes = [
+      "Consistent-Achiever", "Time-Constrained", "High-Availability"
+    ];
+    const phases: PrepPhase[] = ["Foundation", "Acceleration", "Crunch"];
+
+    const randomName = names[Math.floor(Math.random() * names.length)];
+    const randomIIM = targetIIMs[Math.floor(Math.random() * targetIIMs.length)];
+    const randomPercentile = Number((98.0 + Math.random() * 1.9).toFixed(2));
+    const randomFear = fears[Math.floor(Math.random() * fears.length)];
+    const randomWeekday = Number((2.5 + Math.random() * 1.5).toFixed(1));
+    const randomWeekend = Number((5.5 + Math.random() * 2.5).toFixed(1));
+    const randomEnergy = ["morning", "afternoon", "night"][Math.floor(Math.random() * 3)] as "morning" | "afternoon" | "night";
+    const randomPhase = phases[Math.floor(Math.random() * phases.length)];
+    const randomArchetype = `${archetypes[Math.floor(Math.random() * archetypes.length)]}-${randomPhase}`;
+
+    const studentId = `demo-${Date.now()}`;
+    const demoStudent: Student = {
+      id: studentId,
+      user_id: "user-demo",
+      name: randomName,
+      exam_date: "2026-11-29",
+      target_percentile: randomPercentile,
+      available_hours_weekday: randomWeekday,
+      available_hours_weekend: randomWeekend,
+      peak_energy_window: randomEnergy,
+      study_style: Math.random() > 0.5 ? "structured" : "flexible",
+      biggest_fear: randomFear,
+      archetype: randomArchetype,
+      prep_phase: randomPhase,
+      burnout_risk_score: Math.random() < 0.2 ? 0.72 : 0.12, // 20% chance to show high fatigue warning!
+      onboarding_complete: true,
+      pod_alert_opt_in: false,
+      dreamIIM: randomIIM,
+      isDemo: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // 2. Generate customized topic weights with randomized coverage & revision count
+    const demoWeights: TopicWeight[] = DEFAULT_TOPICS.map((t, idx) => {
+      const baseWeight = 0.4 + Math.random() * 0.45;
+      const coverage = Math.floor(25 + Math.random() * 55);
+      const revisions = Math.floor(Math.random() * 4);
+      return {
+        id: `demo-weight-${idx}-${Date.now()}`,
+        student_id: studentId,
         topic: t.topic,
         section: t.section as Section,
-        weight: idx === 0 ? 0.85 : idx === 4 ? 0.78 : idx === 2 ? 0.65 : 0.5,
-        coverage_percent: idx === 0 ? 75 : idx === 4 ? 60 : idx === 2 ? 45 : 30,
-        revision_count: idx === 0 ? 3 : idx === 4 ? 2 : 0,
-        last_studied: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-        fatigue_score: 0.1,
-        avoidance_flag: idx === 3 ? true : false,
+        weight: Number(baseWeight.toFixed(2)),
+        coverage_percent: coverage,
+        revision_count: revisions,
+        last_studied: new Date(Date.now() - Math.floor(Math.random() * 5) * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        fatigue_score: Number((Math.random() * 0.35).toFixed(2)),
+        avoidance_flag: Math.random() < 0.15,
         updated_at: new Date().toISOString(),
-      }));
+      };
+    });
 
-      // Seed 10 days of session logs for beautiful charts and heatmaps
-      const defaultLogs: SessionLog[] = [];
-      for (let i = 0; i < 15; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split("T")[0];
-        
-        let completed = true;
-        let difficulty = 3;
-        let focus = 4;
-        let actual = 60;
-        let notes = "Focused study session completed successfully.";
-        
-        if (i % 5 === 0) {
-          completed = false;
-          notes = "Study slot missed due to office overload.";
-          actual = 0;
-          difficulty = 0;
-          focus = 0;
-        } else if (i % 7 === 0) {
-          completed = true;
-          actual = 25;
-          difficulty = 5;
-          focus = 2;
-          notes = "Felt high mental fatigue during this block.";
-        }
+    // 3. Generate randomized session logs (last 15 days)
+    const demoLogs: SessionLog[] = [];
+    const logNotes = [
+      "Focused study session completed successfully.",
+      "Solved 4 Reading Comprehension passages under timed limits. Pacing is solid.",
+      "Arithmetic practice: finished ratios and percentage formulas. Concept clarity strong.",
+      "Complex DILR matrix sets practice. Felt slightly deadlocked on layout logic.",
+      "Revised linear and quadratic equation shortcuts. Speed is improving.",
+      "Missed study slot due to unexpected work/college commitments.",
+      "Felt high cognitive fatigue during practice, took a shorter recovery block."
+    ];
 
-        defaultLogs.push({
-          id: `log-seed-${i}`,
-          student_id: "student-123",
-          log_date: dateStr,
-          topic: i % 2 === 0 ? "Arithmetic" : "Reading Comprehension",
-          section: i % 2 === 0 ? "Quant" : "VARC",
-          session_type: "Learn",
-          planned_duration_minutes: 60,
-          actual_duration_minutes: actual,
-          difficulty_rating: difficulty || undefined,
-          focus_rating: focus || undefined,
-          completed,
-          notes,
-          logged_at: new Date(d).toISOString(),
-        });
+    for (let i = 0; i < 15; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split("T")[0];
+      const isMissed = i % 5 === 0;
+      const isPartial = i % 7 === 0;
+
+      let completed = true;
+      let actual = 60;
+      let difficulty = 3;
+      let focus = 4;
+      let notes = logNotes[Math.floor(Math.random() * logNotes.length)];
+
+      if (isMissed) {
+        completed = false;
+        notes = "Study slot missed due to unexpected work/college commitments.";
+        actual = 0;
+        difficulty = 0;
+        focus = 0;
+      } else if (isPartial) {
+        completed = true;
+        actual = 25;
+        difficulty = 5;
+        focus = 2;
+        notes = "Felt high mental fatigue during this block. Scaled back to revision only.";
       }
 
-      // Seed mock results
-      const defaultMocks: MockResult[] = [
-        {
-          id: "mock-seed-1",
-          student_id: "student-123",
-          mock_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          source: "SimCAT",
-          overall_percentile: 98.4,
-          varc_score: 42,
-          varc_percentile: 99.1,
-          varc_accuracy: 84.5,
-          varc_time_minutes: 40,
-          dilr_score: 30,
-          dilr_percentile: 96.8,
-          dilr_accuracy: 75.0,
-          dilr_time_minutes: 40,
-          quant_score: 36,
-          quant_percentile: 97.5,
-          quant_accuracy: 80.0,
-          quant_time_minutes: 40,
-          total_attempts: 65,
-          total_accuracy: 79.8,
-          debrief: {
-            headline: "Overall percentile hit 98.4%ile. Excellent VARC pacing, but Quant speed limits algebra escape routes.",
-            three_things_to_fix: [
-              { issue: "Algebra time bleed", action: "Escaped algebra equations after 2 minutes of deadlock." },
-              { issue: "DILR arrangement sets", action: "Dedicate morning blocks to circular ordering games." },
-              { issue: "Quant Arithmetic simple slips", action: "Review basic concepts for percentage calculations." }
-            ],
-            two_things_that_worked: [
-              "Reading Comprehension: 99th percentile speed and high retention.",
-              "Mock Stamina: Maintained focus throughout the 120-minute test."
-            ],
-            plan_adjustment: "Quant weights dialed up. Schedule active revision drills on triangles.",
-            choke_risk: false,
-            choke_note: "No significant avoidance patterns; score variance is normal."
-          },
-          logged_at: new Date().toISOString(),
-        }
-      ];
+      const randomTopicObj = DEFAULT_TOPICS[Math.floor(Math.random() * DEFAULT_TOPICS.length)];
 
-      const defaultAdaptations: AdaptationLog[] = [
-        {
-          id: "adapt-seed-1",
-          student_id: "student-123",
-          log_date: new Date().toISOString().split("T")[0],
-          change_type: "Avoidance Shift",
-          topic_affected: "DILR Complex Sets",
-          reason: "Omission patterns detected on DILR sets. Dynamic planner shifted these to peak evening focus hours.",
-          triggered_by: "session_log",
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: "adapt-seed-2",
-          student_id: "student-123",
-          log_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          change_type: "Weight Calibration",
-          topic_affected: "Quant Algebra",
-          reason: "Flipped practice accuracy results down. Calibration scaled Algebra focus blocks in this cycle.",
-          triggered_by: "mock_result",
-          created_at: new Date().toISOString(),
-        }
-      ];
-
-      const defaultWeekly: WeeklyReport[] = [
-        {
-          id: "report-seed-1",
-          student_id: "student-123",
-          week_start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          week_end: new Date().toISOString().split("T")[0],
-          sessions_planned: 14,
-          sessions_completed: 11,
-          topics_covered: ["Reading Comprehension", "Arithmetic", "Algebra"],
-          weak_topics: ["DILR Complex Sets"],
-          adaptation_changes: [],
-          mock_count: 1,
-          narrative: {
-            headline: "Vibrant pacing. Completed 11/14 blocks successfully.",
-            what_worked: "Highly consistent morning Verbal reading routines.",
-            what_to_watch: "Slight omission drift on DILR matrix sets under late night blocks.",
-            one_change: "Shift complex sets to high-energy afternoon study blocks.",
-            adaptation_summary: "Quant priority weights adjusted to address mock pacing speed gaps.",
-            encouragement: "Fantastic work. You're building a strong, sustainable routine. Preserve this momentum!"
-          },
-          generated_at: new Date().toISOString(),
-        }
-      ];
-
-      const defaultPodMembers: PodMember[] = [
-        {
-          id: "pod-1",
-          name: "Aarav Mehta",
-          target_percentile: "99.5%",
-          streak_days: 14,
-          last_7_days: ["completed", "completed", "completed", "partial", "completed", "completed", "completed"],
-        },
-        {
-          id: "pod-2",
-          name: "Riya Sharma",
-          target_percentile: "99.2%",
-          streak_days: 9,
-          last_7_days: ["completed", "completed", "missed", "completed", "completed", "completed", "completed"],
-        },
-        {
-          id: "pod-3",
-          name: "Siddharth Sen",
-          target_percentile: "99.0%",
-          streak_days: 4,
-          last_7_days: ["partial", "missed", "completed", "completed", "missed", "completed", "completed"],
-        },
-      ];
-
-      set({
-        student: defaultStudent,
-        topicWeights: defaultWeights,
-        sessionLogs: defaultLogs,
-        mockResults: defaultMocks,
-        adaptationLogs: defaultAdaptations,
-        weeklyReports: defaultWeekly,
-        podMembers: defaultPodMembers,
-        podJoined: true,
+      demoLogs.push({
+        id: `demo-log-${i}-${Date.now()}`,
+        student_id: studentId,
+        log_date: dateStr,
+        topic: randomTopicObj.topic,
+        section: randomTopicObj.section as Section,
+        session_type: i % 3 === 0 ? "Practice" : i % 3 === 1 ? "Learn" : "Revise",
+        planned_duration_minutes: 60,
+        actual_duration_minutes: actual,
+        difficulty_rating: difficulty || undefined,
+        focus_rating: focus || undefined,
+        completed,
+        notes,
+        logged_at: new Date(d).toISOString(),
       });
-
-      // Trigger automatic plan creation based on seeded student state
-      get().replanToday();
     }
+
+    // 4. Generate 2 to 3 randomized Mock Results with realistic debrief lists!
+    const mockSources: MockSource[] = ["SimCAT", "AIMCAT", "CL", "TIME", "IMS"];
+    const debriefHeadlineA = `Overall percentile hit ${(randomPercentile - 1.5).toFixed(1)}%ile. Excellent Verbal pacing, but algebra formula gaps need revision.`;
+    const debriefHeadlineB = `Overall percentile reached ${(randomPercentile + 0.2).toFixed(1)}%ile. Strong execution under pressure, particularly in DILR sets selection.`;
+
+    const debriefA: MockDebrief = {
+      headline: debriefHeadlineA,
+      three_things_to_fix: [
+        { issue: "Algebra time bleed", action: "Escaped equations after 2.5 minutes of deadlock." },
+        { issue: "DILR arrangement sets", action: "Dedicate morning slots to linear ordering games." },
+        { issue: "Quant Arithmetic slips", action: "Review basic concepts for percentage calculations." }
+      ],
+      two_things_that_worked: [
+        "Verbal: RC speed was 99th percentile with strong comprehension.",
+        "Stamina: Preserved consistent attention span throughout the 120-minute test."
+      ],
+      plan_adjustment: "Quant weights dialed up. Rescheduling active revision sessions.",
+      choke_risk: false,
+      choke_note: "No significant avoidance patterns; score variance normal."
+    };
+
+    const debriefB: MockDebrief = {
+      headline: debriefHeadlineB,
+      three_things_to_fix: [
+        { issue: "Critical reasoning accuracy", action: "Review assumption-based arguments in VARC." },
+        { issue: "Quant Geometry pacing", action: "Formulate baseline cheatsheets for area calculations." },
+        { issue: "DILR grid sets speed", action: "Practice complex scheduling grids in peak energy hours." }
+      ],
+      two_things_that_worked: [
+        "DILR: Successfully picked the 2 easiest sets and solved them with high accuracy.",
+        "Quant: Strong accuracy on arithmetic questions."
+      ],
+      plan_adjustment: "DILR and VARC weights balanced. Pacing exercises added.",
+      choke_risk: false,
+    };
+
+    const mockCount = Math.random() > 0.5 ? 3 : 2;
+    const demoMocks: MockResult[] = [];
+
+    for (let k = 0; k < mockCount; k++) {
+      const source = mockSources[Math.floor(Math.random() * mockSources.length)];
+      const percentDiff = k === 0 ? 0 : k === 1 ? -2.2 : 1.1;
+      const overallPercentile = Number((randomPercentile + percentDiff).toFixed(2));
+      const mockDate = new Date(Date.now() - (k + 1) * 8 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+      demoMocks.push({
+        id: `demo-mock-${k}-${Date.now()}`,
+        student_id: studentId,
+        mock_date: mockDate,
+        source,
+        overall_percentile: overallPercentile,
+        varc_score: Math.round(overallPercentile * 0.38),
+        varc_percentile: Number((overallPercentile + 0.8).toFixed(1)),
+        varc_accuracy: 82.5,
+        varc_time_minutes: 40,
+        dilr_score: Math.round(overallPercentile * 0.28),
+        dilr_percentile: Number((overallPercentile - 1.2).toFixed(1)),
+        dilr_accuracy: 74.0,
+        dilr_time_minutes: 40,
+        quant_score: Math.round(overallPercentile * 0.32),
+        quant_percentile: Number((overallPercentile - 0.4).toFixed(1)),
+        quant_accuracy: 78.0,
+        quant_time_minutes: 40,
+        total_attempts: 60 + Math.floor(Math.random() * 15),
+        total_accuracy: 75.0 + Math.random() * 8.0,
+        debrief: k === 0 ? debriefB : debriefA,
+        logged_at: new Date().toISOString(),
+      });
+    }
+
+    // 5. Generate dynamic Adaptation Logs
+    const demoAdaptations: AdaptationLog[] = [
+      {
+        id: `demo-adapt-1-${Date.now()}`,
+        student_id: studentId,
+        log_date: new Date().toISOString().split("T")[0],
+        change_type: "Avoidance Shift",
+        topic_affected: "DILR Complex Sets",
+        reason: "Omission patterns detected on arrangement games. Dynamic planner shifted these blocks to peak focus hours.",
+        triggered_by: "session_log",
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: `demo-adapt-2-${Date.now()}`,
+        student_id: studentId,
+        log_date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        change_type: "Weight Calibration",
+        topic_affected: "Quant Algebra",
+        reason: "Flipped practice accuracy results down. Calibration scaled Algebra focus blocks in this cycle.",
+        triggered_by: "mock_result",
+        created_at: new Date().toISOString(),
+      }
+    ];
+
+    // 6. Generate dynamic Weekly Report
+    const demoWeekly: WeeklyReport[] = [
+      {
+        id: `demo-weekly-1-${Date.now()}`,
+        student_id: studentId,
+        week_start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        week_end: new Date().toISOString().split("T")[0],
+        sessions_planned: 14,
+        sessions_completed: 11,
+        topics_covered: ["Reading Comprehension", "Arithmetic", "Algebra"],
+        weak_topics: ["DILR Complex Sets"],
+        adaptation_changes: [],
+        mock_count: 1,
+        narrative: {
+          headline: "Vibrant pacing. Completed 11/14 study blocks successfully.",
+          what_worked: "Highly consistent morning Verbal reading routines.",
+          what_to_watch: "Slight omission drift on complex DILR sets during late night sessions.",
+          one_change: "Shift complex sets to high-energy afternoon study blocks.",
+          adaptation_summary: "Quant priority weights adjusted to address mock pacing speed gaps.",
+          encouragement: "Fantastic work. You're building a strong, sustainable routine. Preserve this momentum!"
+        },
+        generated_at: new Date().toISOString(),
+      }
+    ];
+
+    // 7. Pod members
+    const demoPodMembers: PodMember[] = [
+      {
+        id: "pod-1",
+        name: "Aarav Mehta",
+        target_percentile: "99.5%",
+        streak_days: 14,
+        last_7_days: ["completed", "completed", "completed", "partial", "completed", "completed", "completed"],
+      },
+      {
+        id: "pod-2",
+        name: "Riya Sharma",
+        target_percentile: "99.2%",
+        streak_days: 9,
+        last_7_days: ["completed", "completed", "missed", "completed", "completed", "completed", "completed"],
+      },
+      {
+        id: "pod-3",
+        name: "Siddharth Sen",
+        target_percentile: "99.0%",
+        streak_days: 4,
+        last_7_days: ["partial", "missed", "completed", "completed", "missed", "completed", "completed"],
+      },
+    ];
+
+    // Set state in the store
+    set({
+      student: demoStudent,
+      topicWeights: demoWeights,
+      sessionLogs: demoLogs,
+      mockResults: demoMocks,
+      adaptationLogs: demoAdaptations,
+      weeklyReports: demoWeekly,
+      podMembers: demoPodMembers,
+      podJoined: true,
+    });
+
+    // Generate today's plan based on the seeded mockup student profile
+    await get().replanToday();
+
+    // Save to localStorage immediately
+    localStorage.setItem("goodluck_student_state_v2", JSON.stringify({
+      student: get().student,
+      topicWeights: get().topicWeights,
+      dailyPlans: get().dailyPlans,
+      sessionLogs: get().sessionLogs,
+      mockResults: get().mockResults,
+      adaptationLogs: get().adaptationLogs,
+      burnoutScores: get().burnoutScores,
+      weeklyReports: get().weeklyReports,
+      podMembers: get().podMembers,
+      podJoined: get().podJoined,
+      podCheckin: get().podCheckin,
+    }));
+  },
+
+  clearDemoData: async () => {
+    set({
+      student: null,
+      topicWeights: [],
+      dailyPlans: [],
+      sessionLogs: [],
+      mockResults: [],
+      adaptationLogs: [],
+      burnoutScores: [],
+      weeklyReports: [],
+      podMembers: [],
+      podJoined: false,
+      podCheckin: null,
+    });
+    localStorage.removeItem("goodluck_student_state_v2");
+    localStorage.removeItem("goodluck_student_state");
   },
 
   loadFromSupabase: async () => {

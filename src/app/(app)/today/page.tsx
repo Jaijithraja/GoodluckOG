@@ -6,6 +6,7 @@ import { useStudentStore } from "@/store/studentStore";
 import { PlannedSession } from "@/types";
 import { Sparkles, Play, Clock, AlertCircle, CheckCircle2, RefreshCw, X, HelpCircle, Brain, ChevronUp, ChevronDown, Timer, Pause, RotateCcw, SkipForward, Sliders, Zap } from "lucide-react";
 import confetti from "canvas-confetti";
+import { supabase } from "@/lib/supabase/client";
 
 export default function TodayPlanPage() {
   const router = useRouter();
@@ -24,6 +25,9 @@ export default function TodayPlanPage() {
   const [showLogger, setShowLogger] = useState(false);
   const [expandedSessionIdx, setExpandedSessionIdx] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState("");
+  const [pageLoading, setPageLoading] = useState(true);
+  const [generatingPlan, setGeneratingPlan] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Focus Timer Local State
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -75,23 +79,154 @@ export default function TodayPlanPage() {
     };
   }, [isTimerRunning, timerSeconds, timerDuration]);
 
-  useEffect(() => {
-    // If student onboarding is not complete, redirect to onboarding
-    if (student && !student.onboarding_complete) {
-      router.push("/onboarding");
+  const generatePlan = async (studentId: string) => {
+    setGeneratingPlan(true);
+    setErrorMsg("");
+    try {
+      const { error } = await supabase.functions.invoke("generate-plan", {
+        body: { student_id: studentId },
+      });
+      if (error) throw error;
+      await useStudentStore.getState().loadFromSupabase();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Failed to generate plan. Please try again.");
+    } finally {
+      setGeneratingPlan(false);
     }
+  };
+
+  useEffect(() => {
+    const checkUserAndOnboarding = async () => {
+      // 1. Wait a moment for mount and check if user session is active
+      const sessionRes = await supabase.auth.getSession();
+      const user = sessionRes.data.session?.user;
+
+      if (!user) {
+        // If not logged in, we check if mockup data is active in Zustand
+        if (student && student.isDemo) {
+          setPageLoading(false);
+          return;
+        }
+        // Otherwise, redirect to login
+        router.push("/login");
+        return;
+      }
+
+      // 2. Fetch student row directly from Supabase
+      const { data: stdData } = await supabase
+        .from("students")
+        .select()
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!stdData) {
+        // No student row exists, redirect to onboarding!
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!stdData.onboarding_complete) {
+        // Onboarding is not complete, redirect to onboarding!
+        router.push("/onboarding");
+        return;
+      }
+
+      // Ensure store loaded the database records
+      if (!student || student.id !== stdData.id) {
+        await useStudentStore.getState().loadFromSupabase();
+      }
+
+      // Check if a plan exists for today in Supabase
+      const todayStr = new Date().toISOString().split("T")[0];
+      const { data: existingPlan } = await supabase
+        .from("daily_plans")
+        .select()
+        .eq("student_id", stdData.id)
+        .eq("plan_date", todayStr)
+        .maybeSingle();
+
+      if (!existingPlan) {
+        // Generate plan using edge function
+        setGeneratingPlan(true);
+        try {
+          const { error: pErr } = await supabase.functions.invoke("generate-plan", {
+            body: { student_id: stdData.id },
+          });
+          if (pErr) console.error("Edge function plan generation failed:", pErr);
+        } catch (err) {
+          console.error("Invoke error:", err);
+        } finally {
+          setGeneratingPlan(false);
+          // Reload from Supabase to fetch the generated plan
+          await useStudentStore.getState().loadFromSupabase();
+        }
+      }
+
+      setPageLoading(false);
+    };
+
+    checkUserAndOnboarding();
   }, [student, router]);
+
+  if (pageLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 antialiased bg-bg-base text-text-primary">
+        <RefreshCw className="animate-spin text-accent" size={24} />
+        <span className="font-mono text-xs text-text-secondary uppercase">Loading your plan...</span>
+      </div>
+    );
+  }
+
+  if (generatingPlan) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 antialiased bg-bg-base text-text-primary">
+        <RefreshCw className="animate-spin text-accent" size={24} />
+        <span className="font-mono text-xs text-text-secondary uppercase font-bold">Building your plan for today...</span>
+        <span className="text-xs text-text-secondary/70 font-sans text-center max-w-[280px]">Gemini is reading your profile and topic weights...</span>
+      </div>
+    );
+  }
 
   if (!student) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 antialiased bg-bg-base text-text-primary">
-        <RefreshCw className="animate-spin text-accent" size={24} />
-        <span className="font-mono text-xs text-text-secondary uppercase">Loading Cognitive Blueprints...</span>
+        <AlertCircle className="text-danger" size={32} />
+        <span className="font-sans text-sm text-text-secondary">Please complete your onboarding profile to view plans.</span>
+        <button
+          onClick={() => router.push("/onboarding")}
+          className="bg-accent text-[#0A0A0A] text-xs font-mono font-bold tracking-widest py-2 px-4 rounded"
+        >
+          GO TO ONBOARDING
+        </button>
       </div>
     );
   }
 
   const activePlan = dailyPlans[0];
+
+  if (!activePlan) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4 antialiased bg-bg-base text-text-primary text-center p-6 border border-dashed border-border rounded-lg max-w-[800px] mx-auto mt-12">
+        <Sparkles className="text-accent animate-pulse" size={32} />
+        <h3 className="font-display font-medium text-lg text-text-primary">No plan generated for today yet</h3>
+        <p className="text-xs text-text-secondary max-w-[320px] font-sans">
+          Click below to let Gemini analyze your profile and build your personalized daily schedule.
+        </p>
+        {errorMsg && (
+          <div className="p-3 bg-danger-light border border-danger/20 text-danger-text rounded text-xs font-mono">
+            {errorMsg}
+          </div>
+        )}
+        <button
+          onClick={() => student && generatePlan(student.id)}
+          className="bg-accent hover:bg-accent/90 text-[#0A0A0A] text-xs font-mono font-black uppercase tracking-widest py-3 px-6 rounded-md shadow-sm transition-all cursor-pointer"
+        >
+          Generate today&apos;s plan
+        </button>
+      </div>
+    );
+  }
 
   // Dynamically calculate days remaining based on actual system date and exam_date
   const examDate = new Date(student.exam_date + "T00:00:00");
