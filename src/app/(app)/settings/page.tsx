@@ -29,51 +29,32 @@ export default function SettingsPage() {
   const [toastMessage, setToastMessage] = useState("");
 
   useEffect(() => {
-    const checkUserAndOnboarding = async () => {
-      const sessionRes = await supabase.auth.getSession();
-      const user = sessionRes.data.session?.user;
+    const checkStudentAndOnboarding = () => {
+      const activeStudent = useStudentStore.getState().student;
 
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-
-      const { data: stdData } = await supabase
-        .from("students")
-        .select()
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!stdData) {
+      if (!activeStudent) {
         router.push("/onboarding");
         return;
       }
 
-      if (!stdData.onboarding_complete) {
+      if (!activeStudent.onboarding_complete) {
         router.push("/onboarding");
         return;
       }
 
-      if (!student || student.id !== stdData.id) {
-        await useStudentStore.getState().loadFromSupabase();
-      }
-
-      const currentStudent = useStudentStore.getState().student;
-      if (currentStudent) {
-        setName(currentStudent.name);
-        setExamDate(currentStudent.exam_date);
-        setWeekdayHours(currentStudent.available_hours_weekday);
-        setWeekendHours(currentStudent.available_hours_weekend);
-        setPeakEnergy(currentStudent.peak_energy_window);
-        setStudyStyle(currentStudent.study_style);
-        setDreamIIM(currentStudent.dreamIIM || "A");
-        setTargetPercentile(currentStudent.target_percentile || 99.0);
-      }
+      setName(activeStudent.name);
+      setExamDate(activeStudent.exam_date);
+      setWeekdayHours(activeStudent.available_hours_weekday);
+      setWeekendHours(activeStudent.available_hours_weekend);
+      setPeakEnergy(activeStudent.peak_energy_window);
+      setStudyStyle(activeStudent.study_style);
+      setDreamIIM(activeStudent.dreamIIM || "A");
+      setTargetPercentile(activeStudent.target_percentile || 99.0);
 
       setPageLoading(false);
     };
 
-    checkUserAndOnboarding();
+    checkStudentAndOnboarding();
   }, [student, router]);
 
   if (pageLoading) {

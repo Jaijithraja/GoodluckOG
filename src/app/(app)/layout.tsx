@@ -12,6 +12,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const student = useStudentStore((state) => state.student);
   const loadFromLocalStorage = useStudentStore((state) => state.loadFromLocalStorage);
+  const clearDemoData = useStudentStore((state) => state.clearDemoData);
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
@@ -172,16 +173,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </button>
 
             <button
-              onClick={() => {
-                // Clear state & redirect
-                localStorage.removeItem("goodluck_student_state_v2");
-                localStorage.removeItem("goodluck_student_state");
+              onClick={async () => {
+                // Reset all data & redirect
+                await clearDemoData();
                 router.push("/");
               }}
               className="flex items-center gap-2 text-text-secondary hover:text-danger text-[10px] font-mono font-bold tracking-wider text-left transition-colors cursor-pointer w-fit uppercase"
             >
               <LogOut size={12} />
-              <span>EXIT SESSION</span>
+              <span>RESET ALL DATA</span>
             </button>
           </div>
         )}
@@ -233,15 +233,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
 
               <button
-                onClick={() => {
+                onClick={async () => {
                   setMobileMenuOpen(false);
-                  localStorage.removeItem("goodluck_student_state_v2");
-                  localStorage.removeItem("goodluck_student_state");
+                  await clearDemoData();
                   router.push("/");
                 }}
-                className="text-danger text-xs font-mono font-bold cursor-pointer hover:underline text-left"
+                className="text-danger text-xs font-mono font-bold cursor-pointer hover:underline text-left font-black uppercase tracking-wider"
               >
-                LOGOUT
+                RESET ALL DATA
               </button>
             </div>
           )}

@@ -50,39 +50,23 @@ export default function PodPage() {
   }, [student]);
 
   useEffect(() => {
-    const checkUserAndOnboarding = async () => {
-      const sessionRes = await supabase.auth.getSession();
-      const user = sessionRes.data.session?.user;
+    const checkStudentAndOnboarding = () => {
+      const activeStudent = useStudentStore.getState().student;
 
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-
-      const { data: stdData } = await supabase
-        .from("students")
-        .select()
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!stdData) {
+      if (!activeStudent) {
         router.push("/onboarding");
         return;
       }
 
-      if (!stdData.onboarding_complete) {
+      if (!activeStudent.onboarding_complete) {
         router.push("/onboarding");
         return;
-      }
-
-      if (!student || student.id !== stdData.id) {
-        await useStudentStore.getState().loadFromSupabase();
       }
 
       setPageLoading(false);
     };
 
-    checkUserAndOnboarding();
+    checkStudentAndOnboarding();
   }, [student, router]);
 
   const handleCheckinSubmit = (e: React.FormEvent) => {

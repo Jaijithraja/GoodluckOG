@@ -24,15 +24,10 @@ export default function OnboardingPage() {
 
   const [step, setStep] = useState(1);
 
+  // Remove auth wall and check
   useEffect(() => {
-    const checkAuth = async () => {
-      const sessionRes = await supabase.auth.getSession();
-      if (!sessionRes.data.session?.user) {
-        router.push("/signup");
-      }
-    };
-    checkAuth();
-  }, [router]);
+    // No auth redirection needed for account-free local cockpit
+  }, []);
   const [formData, setFormData] = useState({
     name: "",
     dreamIIM: "A",
@@ -85,65 +80,36 @@ export default function OnboardingPage() {
       // Clean up any demo state before starting real onboarding
       await clearDemoData();
 
-      const sessionRes = await supabase.auth.getSession();
-      const user = sessionRes.data.session?.user;
+      // Directly save the student profile in Zustand (local storage persistence)
+      await setStudentProfile({
+        name: formData.name || "Aspirant",
+        exam_date: formData.examDate,
+        target_percentile: formData.targetPercentile,
+        available_hours_weekday: formData.weekdayHours,
+        available_hours_weekend: formData.weekendHours,
+        peak_energy_window: formData.peakEnergy,
+        study_style: formData.studyStyle,
+        biggest_fear: formData.biggestFear,
+        dreamIIM: formData.dreamIIM,
+        onboarding_complete: true,
+        isDemo: false
+      });
 
-      if (!user) {
-        setError("You must be logged in to save your study plan.");
-        setLoading(false);
-        return;
+      // Fetch store state to adjust weights and mocks
+      const studentState = useStudentStore.getState();
+
+      // Adjust topic weights based on Step 4
+      if (studentState.topicWeights && studentState.topicWeights.length > 0) {
+        for (const [topic, rating] of Object.entries(formData.topics)) {
+          const newWeight = RATING_TO_WEIGHT[rating || "average"];
+          await studentState.adjustTopicWeight(topic, newWeight);
+        }
       }
 
-      // 1. Insert students record
-      const { data: student, error: sErr } = await supabase
-        .from("students")
-        .insert({
-          user_id: user.id,
-          name: formData.name || "Aspirant",
-          exam_date: formData.examDate,
-          target_percentile: formData.targetPercentile,
-          available_hours_weekday: formData.weekdayHours,
-          available_hours_weekend: formData.weekendHours,
-          peak_energy_window: formData.peakEnergy,
-          study_style: formData.studyStyle,
-          biggest_fear: formData.biggestFear,
-          prep_phase: computePhase(formData.examDate),
-          onboarding_complete: false, // set true after plan generates
-          dreamIIM: formData.dreamIIM,
-        })
-        .select()
-        .single();
-
-      if (sErr) {
-        console.error("Student insert error:", sErr);
-        setError("Failed to save your profile. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      // 2. Insert all 9 topic_weights using rating from Step 4
-      const CAT_TOPICS = Object.entries(SECTIONS).flatMap(([section, topics]) =>
-        topics.map((topic) => ({
-          student_id: student.id,
-          topic,
-          section: section as Section,
-          weight: RATING_TO_WEIGHT[formData.topics[topic] || "average"],
-          coverage_percent: 0,
-          revision_count: 0,
-          avoidance_flag: false,
-        }))
-      );
-
-      const { error: twErr } = await supabase.from("topic_weights").insert(CAT_TOPICS);
-      if (twErr) {
-        console.error("Topic weights insert error:", twErr);
-      }
-
-      // 3. If mock scores entered in Step 3: insert mock_results
+      // If mock scores entered in Step 3: log mock result locally
       if (formData.hasMockScore && formData.lastMockScore) {
         const scoreVal = parseFloat(formData.lastMockScore);
-        const { error: mrErr } = await supabase.from("mock_results").insert({
-          student_id: student.id,
+        await studentState.logMockResult({
           mock_date: new Date().toISOString().split("T")[0],
           source: "Other",
           overall_percentile: scoreVal,
@@ -159,30 +125,15 @@ export default function OnboardingPage() {
           total_attempts: 75,
           total_accuracy: 78.5,
         });
-        if (mrErr) {
-          console.error("Mock result insert error:", mrErr);
-        }
       }
 
-      // 4. Call generate-plan Supabase edge function
-      try {
-        const { data: plan, error: pErr } = await supabase.functions.invoke("generate-plan", {
-          body: { student_id: student.id },
-        });
-        if (pErr) {
-          console.error("Plan generation failed:", pErr);
-        }
-      } catch (err) {
-        console.error("Edge function invocation failed:", err);
-      }
+      // Replan today's study blocks to align with customized inputs
+      await useStudentStore.getState().replanToday();
 
-      // 5. Mark onboarding complete
-      await supabase.from("students").update({ onboarding_complete: true }).eq("id", student.id);
-
-      // Force a reload of student store state to ensure it is synchronized
+      // Force a backup load to keep state completely synchronized
       await useStudentStore.getState().loadFromLocalStorage();
 
-      // 6. Redirect to today
+      // Redirect to dashboard today page
       router.push("/today");
     } catch (err) {
       console.error("Onboarding submit failed:", err);

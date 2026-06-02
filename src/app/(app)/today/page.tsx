@@ -100,70 +100,40 @@ export default function TodayPlanPage() {
   };
 
   useEffect(() => {
-    const checkUserAndOnboarding = async () => {
-      // 1. Wait a moment for mount and check if user session is active
-      const sessionRes = await supabase.auth.getSession();
-      const user = sessionRes.data.session?.user;
+    const checkStudentAndOnboarding = async () => {
+      // Check if student profile is active
+      const activeStudent = useStudentStore.getState().student;
 
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-
-      // 2. Fetch student row directly from Supabase
-      const { data: stdData } = await supabase
-        .from("students")
-        .select()
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!stdData) {
-        // No student row exists, redirect to onboarding!
+      if (!activeStudent) {
         router.push("/onboarding");
         return;
       }
 
-      if (!stdData.onboarding_complete) {
-        // Onboarding is not complete, redirect to onboarding!
+      if (!activeStudent.onboarding_complete) {
         router.push("/onboarding");
         return;
       }
 
-      // Ensure store loaded the database records
-      if (!student || student.id !== stdData.id) {
-        await useStudentStore.getState().loadFromSupabase();
-      }
-
-      // Check if a plan exists for today in Supabase
+      // Verify if today's study blueprint is already generated
+      const plans = useStudentStore.getState().dailyPlans;
       const todayStr = new Date().toISOString().split("T")[0];
-      const { data: existingPlan } = await supabase
-        .from("daily_plans")
-        .select()
-        .eq("student_id", stdData.id)
-        .eq("plan_date", todayStr)
-        .maybeSingle();
+      const hasTodayPlan = plans.some(p => p.plan_date === todayStr);
 
-      if (!existingPlan) {
-        // Generate plan using edge function
+      if (!hasTodayPlan) {
         setGeneratingPlan(true);
         try {
-          const { error: pErr } = await supabase.functions.invoke("generate-plan", {
-            body: { student_id: stdData.id },
-          });
-          if (pErr) console.error("Edge function plan generation failed:", pErr);
+          await useStudentStore.getState().replanToday();
         } catch (err) {
-          console.error("Invoke error:", err);
+          console.error("Local plan generation failed:", err);
         } finally {
           setGeneratingPlan(false);
-          // Reload from Supabase to fetch the generated plan
-          await useStudentStore.getState().loadFromSupabase();
         }
       }
 
       setPageLoading(false);
     };
 
-    checkUserAndOnboarding();
+    checkStudentAndOnboarding();
   }, [student, router]);
 
   if (pageLoading) {
