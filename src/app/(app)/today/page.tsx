@@ -403,8 +403,9 @@ export default function TodayPlanPage() {
                     </p>
                     <button
                       onClick={() => {
+                        const targetTopic = avoidedTopics[0].topic;
                         const updatedSessions = activePlan.sessions.map((s) => {
-                          if (s.topic === avoidedTopics[0].topic) {
+                          if (s.topic === targetTopic) {
                             return {
                               ...s,
                               duration_minutes: 15,
@@ -414,10 +415,38 @@ export default function TodayPlanPage() {
                           }
                           return s;
                         });
-                        activePlan.sessions = updatedSessions;
+                        
+                        const updatedPlans = dailyPlans.map((plan) => {
+                          if (plan.id === activePlan.id) {
+                            return { ...plan, sessions: updatedSessions };
+                          }
+                          return plan;
+                        });
+                        
+                        // Update state properly
+                        useStudentStore.setState({ dailyPlans: updatedPlans });
+                        
+                        // Persist to local storage
+                        const rawState = localStorage.getItem("goodluck_student_state_v2");
+                        if (rawState) {
+                          try {
+                            const parsed = JSON.parse(rawState);
+                            parsed.dailyPlans = updatedPlans;
+                            localStorage.setItem("goodluck_student_state_v2", JSON.stringify(parsed));
+                          } catch (e) {
+                            console.error("Local storage update failed", e);
+                          }
+                        }
+                        
                         setAvoidanceApplied(true);
                         setToastMessage("Warmup applied! Planned block scaled to 15m.");
                         setTimeout(() => setToastMessage(""), 4000);
+                        
+                        // Automatically open focus timer modal and run it
+                        const updatedSession = updatedSessions.find(s => s.topic === targetTopic);
+                        if (updatedSession) {
+                          handleOpenLogger(updatedSession);
+                        }
                       }}
                       className="bg-warning text-[#0A0A0A] hover:bg-warning/90 text-[10px] font-mono font-black tracking-widest py-2.5 px-4 rounded-md uppercase transition-all cursor-pointer block w-fit"
                     >
