@@ -332,7 +332,7 @@ export default function Home() {
         <div className="hero-neon-glow" />
 
         {/* Floating coordinate badges */}
-        <div className="absolute inset-0 pointer-events-none hidden lg:flex justify-center select-none z-0">
+        <div className="absolute inset-x-0 top-0 h-[480px] pointer-events-none hidden lg:flex justify-center select-none z-0">
           <div className="relative w-full max-w-[1200px] h-full">
             <div className="absolute top-[22%] left-[2%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm">
               <span className="w-2 h-2 rounded-full bg-success" />
