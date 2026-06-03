@@ -6,6 +6,7 @@ import { useStudentStore } from "@/store/studentStore";
 import { ArrowRight, ShieldCheck, Zap, Heart, Flame, ShieldAlert, Check, Play, Square, RotateCcw, ChevronDown, AlertCircle, Sun, Moon } from "lucide-react";
 import Link from "next/link";
 import GoodluckLogo from "@/components/GoodluckLogo";
+import { LandingWrapper } from "@/components/LandingWrapper";
 
 // Quiz questions structure - strictly calibrated to serious adult CAT aspirants (22-26 age group)
 const QUESTIONS = [
@@ -261,7 +262,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-base text-text-primary select-none antialiased overflow-x-hidden font-sans selection:bg-accent/10 selection:text-accent">
+    <LandingWrapper>
+      <div className="min-h-screen bg-bg-base text-text-primary select-none antialiased overflow-x-hidden font-sans selection:bg-accent/10 selection:text-accent">
       
       {/* ─────────────────────────────────────────────
          1. FULLSCREEN PROGRESS LOADER
@@ -1031,6 +1033,7 @@ export default function Home() {
         </div>
       </footer>
 
-    </div>
+      </div>
+    </LandingWrapper>
   );
 }

@@ -6,6 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useStudentStore } from "@/store/studentStore";
 import { Calendar, CheckSquare, BarChart2, FileText, UserCheck, Settings, LogOut, Menu, X, Sun, Moon } from "lucide-react";
 import GoodluckLogo from "@/components/GoodluckLogo";
+import { LoadingScreen } from "@/components/LoadingScreen";
+import { LogoButton } from "@/components/LogoButton";
+import { useLoadingStore } from "@/store/loading";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -13,6 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const student = useStudentStore((state) => state.student);
   const loadFromLocalStorage = useStudentStore((state) => state.loadFromLocalStorage);
   const clearDemoData = useStudentStore((state) => state.clearDemoData);
+  const { playing } = useLoadingStore();
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
@@ -70,12 +74,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="h-screen w-screen bg-bg-base text-text-primary flex flex-col md:flex-row select-none antialiased overflow-hidden">
+      {playing && <LoadingScreen />}
       
       {/* Mobile Header */}
       <header className="md:hidden flex items-center justify-between px-6 py-4 bg-bg-surface border-b border-border z-30 sticky top-0 shadow-warm">
-        <Link href="/today">
-          <GoodluckLogo size={24} showTagline={false} />
-        </Link>
+        <LogoButton />
         <div className="flex items-center gap-4">
           <div className="bg-accent-light border border-accent/20 px-2.5 py-1 rounded-full flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
@@ -94,9 +97,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex flex-col w-[260px] bg-bg-surface border-r border-border p-6 h-screen justify-between shrink-0 sticky top-0 shadow-warm overflow-y-auto">
         <div className="space-y-6">
           {/* Brand header */}
-          <Link href="/today" className="block hover:opacity-90 transition-opacity">
-            <GoodluckLogo size={36} showTagline={true} />
-          </Link>
+          <div className="block hover:opacity-90 transition-opacity">
+            <LogoButton />
+          </div>
 
           {/* Countdown card anchor */}
           <div className="bg-bg-sunken border border-border rounded-xl p-4 space-y-3 relative overflow-hidden">
