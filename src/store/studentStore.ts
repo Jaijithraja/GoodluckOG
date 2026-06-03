@@ -938,8 +938,10 @@ export const useStudentStore = create<StudentState>((set, get) => ({
       }
     }
 
+    const today = new Date().toISOString().split("T")[0];
     set({
-      dailyPlans: [newPlan, ...get().dailyPlans],
+      // Replace any existing plan for today instead of duplicating
+      dailyPlans: [newPlan, ...get().dailyPlans.filter(p => p.plan_date !== today)],
     });
   },
 

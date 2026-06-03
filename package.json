@@ -9,7 +9,8 @@
     "lint": "next lint",
     "test": "npx tsx scripts/run-system-tests.ts && npx tsx scripts/run-api-tests.ts",
     "test:system": "npx tsx scripts/run-system-tests.ts",
-    "test:api": "npx tsx scripts/run-api-tests.ts"
+    "test:api": "npx tsx scripts/run-api-tests.ts",
+    "test:full": "npx tsx scripts/run-full-tests.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",
