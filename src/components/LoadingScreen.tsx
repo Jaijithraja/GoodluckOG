@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLoadingStore } from '@/store/loading'
 
 interface Props {
@@ -8,11 +8,15 @@ interface Props {
 
 export function LoadingScreen({ onComplete }: Props) {
   const { phase } = useLoadingStore()
+  const isFirstMount = useRef(true)
 
   useEffect(() => {
     if (phase === 'done') {
-      onComplete?.()
+      if (!isFirstMount.current) {
+        onComplete?.()
+      }
     }
+    isFirstMount.current = false
   }, [phase, onComplete])
 
   if (phase === 'done') return null

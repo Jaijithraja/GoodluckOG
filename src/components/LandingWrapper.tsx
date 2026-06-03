@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { LoadingScreen } from './LoadingScreen'
 import { useLoadingStore } from '@/store/loading'
 
@@ -10,6 +10,7 @@ interface Props {
 export function LandingWrapper({ children }: Props) {
   const [showContent, setShowContent] = useState(false)
   const { play, phase, playing } = useLoadingStore()
+  const isFirstMount = useRef(true)
 
   useEffect(() => {
     if (phase === 'done' && !playing) {
@@ -22,8 +23,11 @@ export function LandingWrapper({ children }: Props) {
 
   useEffect(() => {
     if (phase === 'out' || phase === 'done') {
-      setShowContent(true)
+      if (!isFirstMount.current) {
+        setShowContent(true)
+      }
     }
+    isFirstMount.current = false
   }, [phase])
 
   const contentStyle: React.CSSProperties = {
