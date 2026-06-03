@@ -38,6 +38,7 @@ interface StudentState {
   podMembers: PodMember[];
   podJoined: boolean;
   podCheckin: { win: string; struggle: string; submitted: boolean } | null;
+  initialized: boolean;
 
   // Core actions
   setStudentProfile: (profile: Omit<Student, "id" | "user_id" | "created_at" | "updated_at" | "burnout_risk_score" | "prep_phase" | "pod_id" | "pod_alert_opt_in">) => Promise<void>;
@@ -157,6 +158,7 @@ export const useStudentStore = create<StudentState>((set, get) => ({
   podMembers: [],
   podJoined: false,
   podCheckin: null,
+  initialized: false,
 
   setStudentProfile: async (profile) => {
     // 1. Calculate general parameters
@@ -1231,9 +1233,11 @@ export const useStudentStore = create<StudentState>((set, get) => ({
           podMembers: parsed.podMembers || [],
           podJoined: parsed.podJoined || false,
           podCheckin: parsed.podCheckin || null,
+          initialized: true,
         });
       } catch (err) {
         console.error("Failed to load local storage", err);
+        set({ initialized: true });
       }
     } else {
       // Do NOT automatically seed anything, keep student as null for clean onboarding!
@@ -1249,6 +1253,7 @@ export const useStudentStore = create<StudentState>((set, get) => ({
         podMembers: [],
         podJoined: false,
         podCheckin: null,
+        initialized: true,
       });
     }
   },
@@ -1588,7 +1593,10 @@ export const useStudentStore = create<StudentState>((set, get) => ({
     const sessionRes = await supabase.auth.getSession();
     const user = sessionRes.data.session?.user;
 
-    if (!user) return;
+    if (!user) {
+      set({ initialized: true });
+      return;
+    }
 
     try {
       // 1. Fetch Student profile row
@@ -1602,6 +1610,7 @@ export const useStudentStore = create<StudentState>((set, get) => ({
 
       if (!stdData) {
         // No student created yet, let's keep simulated state or let onboarding handle it
+        set({ initialized: true });
         return;
       }
 
@@ -1831,9 +1840,11 @@ export const useStudentStore = create<StudentState>((set, get) => ({
             last_7_days: ["partial", "missed", "completed", "completed", "missed", "completed", "completed"],
           },
         ],
+        initialized: true,
       });
     } catch (err) {
       console.error("Failed to load state from Supabase db", err);
+      set({ initialized: true });
     }
   },
 }));

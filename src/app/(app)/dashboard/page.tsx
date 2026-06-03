@@ -12,6 +12,7 @@ export default function DashboardPage() {
   
   // Zustand selectors
   const student = useStudentStore((state) => state.student);
+  const initialized = useStudentStore((state) => state.initialized);
   const topicWeights = useStudentStore((state) => state.topicWeights);
   const dailyPlans = useStudentStore((state) => state.dailyPlans);
   const sessionLogs = useStudentStore((state) => state.sessionLogs);
@@ -28,23 +29,15 @@ export default function DashboardPage() {
   const [toastMessage, setToastMessage] = useState("");
 
   useEffect(() => {
-    const checkStudentAndOnboarding = () => {
-      const activeStudent = useStudentStore.getState().student;
+    if (!initialized) return;
 
-      if (!activeStudent) {
-        router.push("/onboarding");
-        return;
-      }
+    if (!student || !student.onboarding_complete) {
+      router.push("/onboarding");
+      return;
+    }
 
-      if (!activeStudent.onboarding_complete) {
-        router.push("/onboarding");
-        return;
-      }
-
-      setPageLoading(false);
-    };
-    checkStudentAndOnboarding();
-  }, [router, student]);
+    setPageLoading(false);
+  }, [initialized, student, router]);
 
   useEffect(() => {
     // Fetch live custom support coaching text from Claude API route if burnout risk is high

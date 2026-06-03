@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase/client";
 export default function WeeklyPage() {
   const router = useRouter();
   const student = useStudentStore((state) => state.student);
+  const initialized = useStudentStore((state) => state.initialized);
   const weeklyReports = useStudentStore((state) => state.weeklyReports);
   const generateWeeklyReport = useStudentStore((state) => state.generateWeeklyReport);
   const topicWeights = useStudentStore((state) => state.topicWeights);
@@ -19,23 +20,15 @@ export default function WeeklyPage() {
   const [generatingReport, setGeneratingReport] = useState(false);
 
   useEffect(() => {
-    const checkStudentAndOnboarding = () => {
-      const activeStudent = useStudentStore.getState().student;
+    if (!initialized) return;
 
-      if (!activeStudent) {
-        router.push("/onboarding");
-        return;
-      }
+    if (!student || !student.onboarding_complete) {
+      router.push("/onboarding");
+      return;
+    }
 
-      if (!activeStudent.onboarding_complete) {
-        router.push("/onboarding");
-        return;
-      }
-
-      setPageLoading(false);
-    };
-    checkStudentAndOnboarding();
-  }, [student, router]);
+    setPageLoading(false);
+  }, [initialized, student, router]);
 
   useEffect(() => {
     // Generate an initial weekly report if there are none, to populate UI beautifully

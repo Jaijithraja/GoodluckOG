@@ -11,6 +11,7 @@ export default function SettingsPage() {
 
   // Zustand selectors
   const student = useStudentStore((state) => state.student);
+  const initialized = useStudentStore((state) => state.initialized);
   const topicWeights = useStudentStore((state) => state.topicWeights);
   const mockResults = useStudentStore((state) => state.mockResults);
   const setStudentProfile = useStudentStore((state) => state.setStudentProfile);
@@ -30,6 +31,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const checkStudentAndOnboarding = () => {
+      if (!initialized) return;
+
       const activeStudent = useStudentStore.getState().student;
 
       if (!activeStudent) {
@@ -55,7 +58,7 @@ export default function SettingsPage() {
     };
 
     checkStudentAndOnboarding();
-  }, [student, router]);
+  }, [initialized, student, router]);
 
   if (pageLoading) {
     return (

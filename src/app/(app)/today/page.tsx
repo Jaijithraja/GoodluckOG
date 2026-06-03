@@ -13,6 +13,7 @@ export default function TodayPlanPage() {
   
   // Zustand selectors
   const student = useStudentStore((state) => state.student);
+  const initialized = useStudentStore((state) => state.initialized);
   const dailyPlans = useStudentStore((state) => state.dailyPlans);
   const sessionLogs = useStudentStore((state) => state.sessionLogs);
   const replanToday = useStudentStore((state) => state.replanToday);
@@ -128,6 +129,8 @@ export default function TodayPlanPage() {
 
   useEffect(() => {
     const checkStudentAndOnboarding = async () => {
+      if (!initialized) return;
+
       // Check if student profile is active
       const activeStudent = useStudentStore.getState().student;
 
@@ -161,7 +164,7 @@ export default function TodayPlanPage() {
     };
 
     checkStudentAndOnboarding();
-  }, [student, router]);
+  }, [initialized, student, router]);
 
   if (pageLoading) {
     return (

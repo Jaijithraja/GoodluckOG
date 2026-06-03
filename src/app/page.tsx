@@ -61,6 +61,7 @@ const QUESTIONS = [
 export default function Home() {
   const router = useRouter();
   const student = useStudentStore((state) => state.student);
+  const initialized = useStudentStore((state) => state.initialized);
   const loadFromLocalStorage = useStudentStore((state) => state.loadFromLocalStorage);
 
   const [mounted, setMounted] = useState(false);
@@ -169,6 +170,14 @@ export default function Home() {
     setLoaderProgress(100);
     setLoaderComplete(true);
   }, [loadFromLocalStorage, generateWeekPlanData]);
+
+
+  // Redirect to dashboard if already onboarded
+  useEffect(() => {
+    if (initialized && student && student.onboarding_complete) {
+      router.push("/today");
+    }
+  }, [initialized, student, router]);
 
   // Pomodoro Timer tick logic
   useEffect(() => {

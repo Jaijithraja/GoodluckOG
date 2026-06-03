@@ -11,6 +11,7 @@ export default function PodPage() {
 
   // Zustand selectors
   const student = useStudentStore((state) => state.student);
+  const initialized = useStudentStore((state) => state.initialized);
   const podMembers = useStudentStore((state) => state.podMembers);
   const podJoined = useStudentStore((state) => state.podJoined);
   const podCheckin = useStudentStore((state) => state.podCheckin);
@@ -50,24 +51,15 @@ export default function PodPage() {
   }, [student]);
 
   useEffect(() => {
-    const checkStudentAndOnboarding = () => {
-      const activeStudent = useStudentStore.getState().student;
+    if (!initialized) return;
 
-      if (!activeStudent) {
-        router.push("/onboarding");
-        return;
-      }
+    if (!student || !student.onboarding_complete) {
+      router.push("/onboarding");
+      return;
+    }
 
-      if (!activeStudent.onboarding_complete) {
-        router.push("/onboarding");
-        return;
-      }
-
-      setPageLoading(false);
-    };
-
-    checkStudentAndOnboarding();
-  }, [student, router]);
+    setPageLoading(false);
+  }, [initialized, student, router]);
 
   const handleCheckinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
