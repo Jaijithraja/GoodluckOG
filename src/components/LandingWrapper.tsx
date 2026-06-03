@@ -1,6 +1,7 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { LoadingScreen } from './LoadingScreen'
+import { useLoadingStore } from '@/store/loading'
 
 interface Props {
   children: React.ReactNode
@@ -8,10 +9,22 @@ interface Props {
 
 export function LandingWrapper({ children }: Props) {
   const [showContent, setShowContent] = useState(false)
+  const { play, phase, playing } = useLoadingStore()
 
-  const handleComplete = useCallback(() => {
-    setShowContent(true)
+  useEffect(() => {
+    if (phase === 'done' && !playing) {
+      play()
+    } else if (phase === 'out' || phase === 'done') {
+      setShowContent(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (phase === 'out' || phase === 'done') {
+      setShowContent(true)
+    }
+  }, [phase])
 
   const contentStyle: React.CSSProperties = {
     opacity: showContent ? 1 : 0,
@@ -23,7 +36,7 @@ export function LandingWrapper({ children }: Props) {
 
   return (
     <>
-      <LoadingScreen onComplete={handleComplete} />
+      <LoadingScreen onComplete={() => setShowContent(true)} />
       <div style={contentStyle}>
         {children}
       </div>

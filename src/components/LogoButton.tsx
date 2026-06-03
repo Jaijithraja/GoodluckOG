@@ -1,8 +1,14 @@
 'use client'
 import { useLoadingStore } from '@/store/loading'
 import { useRouter } from 'next/navigation'
+import { GoodluckIcon } from './GoodluckLogo'
 
-export function LogoButton() {
+interface LogoButtonProps {
+  size?: number
+  showTagline?: boolean
+}
+
+export function LogoButton({ size = 32, showTagline = false }: LogoButtonProps) {
   const { play } = useLoadingStore()
   const router = useRouter()
 
@@ -10,7 +16,7 @@ export function LogoButton() {
     play()
     setTimeout(() => {
       router.push('/')
-    }, 2500)
+    }, 1500)
   }
 
   return (
@@ -23,23 +29,21 @@ export function LogoButton() {
         padding: 0,
         display: 'flex',
         alignItems: 'center',
-        gap: 10
+        gap: 12,
+        textAlign: 'left'
       }}
       aria-label="Go to Goodluck home"
     >
-      <img
-        src="/Goodluck_.png"
-        alt=""
-        aria-hidden="true"
-        style={{ width: 32, height: 32, objectFit: 'contain' }}
-      />
+      <GoodluckIcon size={size} />
       <span style={{
-        fontWeight: 700,
-        fontSize: 16,
-        letterSpacing: '0.1em',
-        color: '#ADFF2F'
+        fontFamily: 'var(--font-display), system-ui, sans-serif',
+        fontWeight: 600,
+        fontSize: size * 0.75,
+        color: '#FFFFFF',
+        letterSpacing: '-0.02em',
+        lineHeight: 1
       }}>
-        GOODLUCK
+        Goodluck
       </span>
     </button>
   )

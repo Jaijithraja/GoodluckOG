@@ -1,37 +1,19 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useLoadingStore } from '@/store/loading'
-
-type Phase = 'hidden' | 'appear' | 'glow' | 'zoom' | 'out' | 'done'
 
 interface Props {
   onComplete?: () => void
 }
 
 export function LoadingScreen({ onComplete }: Props) {
-  const [phase, setPhase] = useState<Phase>('hidden')
-  const { playing, stop } = useLoadingStore()
+  const { phase } = useLoadingStore()
 
   useEffect(() => {
-    if (!playing && !onComplete) {
-      return
-    }
-
-    setPhase('hidden')
-    const t1 = setTimeout(() => setPhase('appear'), 100)
-    const t2 = setTimeout(() => setPhase('glow'), 500)
-    const t3 = setTimeout(() => setPhase('zoom'), 1300)
-    const t4 = setTimeout(() => setPhase('out'), 2100)
-    const t5 = setTimeout(() => {
-      setPhase('done')
-      if (playing) {
-        stop()
-      }
+    if (phase === 'done') {
       onComplete?.()
-    }, 2500)
-
-    return () => [t1, t2, t3, t4, t5].forEach(clearTimeout)
-  }, [playing, stop, onComplete])
+    }
+  }, [phase, onComplete])
 
   if (phase === 'done') return null
 
@@ -55,11 +37,11 @@ export function LoadingScreen({ onComplete }: Props) {
       : 'drop-shadow(0 0 0px transparent)',
 
     transition: phase === 'appear'
-      ? 'opacity 350ms ease-out, transform 350ms ease-out, filter 350ms ease-out'
+      ? 'opacity 400ms ease-out, transform 400ms ease-out, filter 400ms ease-out'
       : phase === 'glow'
-      ? 'filter 600ms ease-out'
+      ? 'filter 700ms ease-out'
       : phase === 'zoom'
-      ? 'opacity 700ms ease-in, transform 700ms cubic-bezier(0.55, 0, 1, 0.45), filter 400ms ease-in'
+      ? 'opacity 750ms ease-in, transform 750ms cubic-bezier(0.55, 0, 1, 0.45), filter 500ms ease-in'
       : 'none',
   }
 
@@ -75,11 +57,11 @@ export function LoadingScreen({ onComplete }: Props) {
       ? '0 0 16px #ADFF2F, 0 0 40px #ADFF2F66'
       : '0 0 0px transparent',
     transition: phase === 'appear'
-      ? 'opacity 350ms ease-out 100ms, transform 350ms ease-out 100ms'
+      ? 'opacity 400ms ease-out 120ms, transform 400ms ease-out 120ms'
       : phase === 'glow'
-      ? 'text-shadow 600ms ease-out'
+      ? 'text-shadow 700ms ease-out'
       : phase === 'zoom'
-      ? 'opacity 500ms ease-in, transform 500ms ease-in'
+      ? 'opacity 600ms ease-in, transform 600ms ease-in'
       : 'none',
   }
 
@@ -94,7 +76,7 @@ export function LoadingScreen({ onComplete }: Props) {
     gap: 20,
     zIndex: 9999,
     opacity: phase === 'out' ? 0 : 1,
-    transition: phase === 'out' ? 'opacity 400ms ease-out' : 'none',
+    transition: phase === 'out' ? 'opacity 500ms ease-out' : 'none',
   }
 
   return (
