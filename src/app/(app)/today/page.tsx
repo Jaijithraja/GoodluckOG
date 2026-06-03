@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStudentStore } from "@/store/studentStore";
 import { PlannedSession } from "@/types";
-import { Sparkles, Play, Clock, AlertCircle, CheckCircle2, RefreshCw, X, HelpCircle, Brain, ChevronUp, ChevronDown, Timer, Pause, RotateCcw, SkipForward, Sliders, Zap } from "lucide-react";
+import { Sparkles, Play, Clock, AlertCircle, CheckCircle2, RefreshCw, X, HelpCircle, Brain, ChevronUp, ChevronDown, Timer, Pause, RotateCcw, SkipForward, Sliders, Zap, Search } from "lucide-react";
 import confetti from "canvas-confetti";
 import { supabase } from "@/lib/supabase/client";
 
@@ -46,6 +46,28 @@ export default function TodayPlanPage() {
     focus: 4,
     notes: "",
   });
+
+  // Search & Filter State for Priority Board
+  const [boardSearch, setBoardSearch] = useState("");
+  const [boardTab, setBoardTab] = useState<"weekly" | "all">("weekly");
+
+  // Sort topic weights by weight descending
+  const sortedWeights = [...topicWeights].sort((a, b) => b.weight - a.weight);
+
+  // Filter based on search query
+  const filteredWeights = sortedWeights.filter((weightObj) => {
+    const query = boardSearch.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      weightObj.topic.toLowerCase().includes(query) ||
+      weightObj.section.toLowerCase().includes(query)
+    );
+  });
+
+  // If tab is "weekly" and search query is empty, show only the top 5 highest-weight topics
+  const displayedWeights = (boardTab === "weekly" && !boardSearch.trim())
+    ? filteredWeights.slice(0, 5)
+    : filteredWeights;
 
   // Pomodoro/Focus Timer Ticking logic
   useEffect(() => {
@@ -501,95 +523,140 @@ export default function TodayPlanPage() {
           DYNAMIC PRIORITISATION BOARD
           ==================================================================== */}
       <div className="bg-bg-elevated border border-border rounded-lg p-6 md:p-8 space-y-6 shadow-warm">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/40 pb-4">
           <div className="space-y-1">
             <h2 className="font-display font-semibold text-lg text-text-primary flex items-center gap-2">
               <Sliders size={18} className="text-accent" />
               Subject Priority Board
             </h2>
             <p className="text-xs text-text-secondary font-sans leading-relaxed">
-              A live view of topics needing more attention based on your preparation progress.
+              Track and calibrate your weakest areas. Use search or toggle view options to find specific topics.
             </p>
           </div>
         </div>
 
+        {/* Search & Filter Controls */}
+        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+          {/* Tabs: Weekly Focus vs All Topics */}
+          <div className="flex bg-bg-base p-1 rounded-md border border-border w-full sm:w-auto">
+            <button
+              onClick={() => setBoardTab("weekly")}
+              className={`flex-1 sm:flex-none text-[10px] font-mono font-black uppercase tracking-wider py-1.5 px-4 rounded transition-all cursor-pointer ${
+                boardTab === "weekly"
+                  ? "bg-bg-surface text-accent border border-border-strong"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
+            >
+              Weekly Focus
+            </button>
+            <button
+              onClick={() => setBoardTab("all")}
+              className={`flex-1 sm:flex-none text-[10px] font-mono font-black uppercase tracking-wider py-1.5 px-4 rounded transition-all cursor-pointer ${
+                boardTab === "all"
+                  ? "bg-bg-surface text-accent border border-border-strong"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
+            >
+              All Topics ({topicWeights.length})
+            </button>
+          </div>
+
+          {/* Search Input */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" size={13} />
+            <input
+              type="text"
+              placeholder="Search topics or sections..."
+              value={boardSearch}
+              onChange={(e) => setBoardSearch(e.target.value)}
+              className="w-full bg-bg-surface border border-border hover:border-border-strong focus:border-accent text-xs rounded-md pl-9 pr-3 py-2 focus:outline-none transition-all placeholder:text-text-tertiary"
+            />
+          </div>
+        </div>
+
         <div className="space-y-3.5">
-          {[...topicWeights].sort((a, b) => b.weight - a.weight).map((weightObj, idx) => {
-            const urgencyVal = weightObj.weight;
-            let urgencyLabel = "STEADY PACE";
-            let urgencyColor = "text-[#3B82F6] bg-[#3B82F6]/10 border-[#3B82F6]/30";
-            let reasonStr = "Normal study sequence for syllabus completion.";
+          {displayedWeights.length > 0 ? (
+            displayedWeights.map((weightObj, idx) => {
+              const urgencyVal = weightObj.weight;
+              let urgencyLabel = "STEADY PACE";
+              let urgencyColor = "text-[#3B82F6] bg-[#3B82F6]/10 border-[#3B82F6]/30";
+              let reasonStr = "Normal study sequence for syllabus completion.";
 
-            if (urgencyVal >= 0.8) {
-              urgencyLabel = "NEEDS ATTENTION";
-              urgencyColor = "text-danger bg-danger-light border-danger/35";
-              reasonStr = weightObj.avoidance_flag 
-                ? "You seem to be skipping this topic recently: study this first."
-                : "You have not studied this topic in a while: schedule a session.";
-            } else if (urgencyVal >= 0.6) {
-              urgencyLabel = "HIGH PRIORITY";
-              urgencyColor = "text-warning bg-warning-light border-warning/35";
-              reasonStr = "Your focus on this section is below your target plan.";
-            } else if (urgencyVal < 0.35) {
-              urgencyLabel = "WELL PREPARED";
-              urgencyColor = "text-success bg-success-light border-success/35";
-              reasonStr = "You are doing great in this topic: keep it revised.";
-            }
+              if (urgencyVal >= 0.8) {
+                urgencyLabel = "NEEDS ATTENTION";
+                urgencyColor = "text-danger bg-danger-light border-danger/35";
+                reasonStr = weightObj.avoidance_flag 
+                  ? "You seem to be skipping this topic recently: study this first."
+                  : "You have not studied this topic in a while: schedule a session.";
+              } else if (urgencyVal >= 0.6) {
+                urgencyLabel = "HIGH PRIORITY";
+                urgencyColor = "text-warning bg-warning-light border-warning/35";
+                reasonStr = "Your focus on this section is below your target plan.";
+              } else if (urgencyVal < 0.35) {
+                urgencyLabel = "WELL PREPARED";
+                urgencyColor = "text-success bg-success-light border-success/35";
+                reasonStr = "You are doing great in this topic: keep it revised.";
+              }
 
-            let secBadge = "bg-[#3B82F6]/10 text-[#93C5FD] border border-[#3B82F6]/30";
-            if (weightObj.section === "DILR") {
-              secBadge = "bg-[#8B5CF6]/10 text-[#C4B5FD] border border-[#8B5CF6]/30";
-            } else if (weightObj.section === "Quant") {
-              secBadge = "bg-[#10B981]/10 text-[#A7F3D0] border border-[#10B981]/30";
-            }
+              let secBadge = "bg-[#3B82F6]/10 text-[#93C5FD] border border-[#3B82F6]/30";
+              if (weightObj.section === "DILR") {
+                secBadge = "bg-[#8B5CF6]/10 text-[#C4B5FD] border border-[#8B5CF6]/30";
+              } else if (weightObj.section === "Quant") {
+                secBadge = "bg-[#10B981]/10 text-[#A7F3D0] border border-[#10B981]/30";
+              }
 
-            return (
-              <div key={weightObj.id || idx} className="bg-bg-surface border border-border/60 rounded-md p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-calm hover:border-border-strong">
-                <div className="space-y-1.5 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-[9px] font-mono font-black uppercase tracking-wider px-2 py-0.5 rounded-badge ${secBadge}`}>
-                      {weightObj.section}
-                    </span>
-                    <h4 className="font-display font-bold text-sm text-text-primary tracking-wide">
-                      {weightObj.topic}
-                    </h4>
-                    <span className={`text-[8px] font-mono font-black tracking-widest px-2 py-0.5 rounded-badge uppercase ${urgencyColor}`}>
-                      {urgencyLabel}
-                    </span>
+              return (
+                <div key={weightObj.id || idx} className="bg-bg-surface border border-border/60 rounded-md p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-calm hover:border-border-strong">
+                  <div className="space-y-1.5 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-[9px] font-mono font-black uppercase tracking-wider px-2 py-0.5 rounded-badge ${secBadge}`}>
+                        {weightObj.section}
+                      </span>
+                      <h4 className="font-display font-bold text-sm text-text-primary tracking-wide">
+                        {weightObj.topic}
+                      </h4>
+                      <span className={`text-[8px] font-mono font-black tracking-widest px-2 py-0.5 rounded-badge uppercase ${urgencyColor}`}>
+                        {urgencyLabel}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-text-secondary leading-relaxed font-sans italic">{reasonStr}</p>
                   </div>
-                  <p className="text-[11px] text-text-secondary leading-relaxed font-sans italic">{reasonStr}</p>
+
+                  <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t border-border/30 pt-3 md:pt-0 md:border-0">
+                    <div className="space-y-1 md:text-right">
+                      <span className="text-[9px] font-mono text-text-secondary uppercase tracking-widest block font-bold">
+                        ATTENTION WEIGHT
+                      </span>
+                      <span className="font-mono text-xs font-black text-accent-text bg-accent-light px-2 py-0.5 rounded-md border border-accent/25">
+                        {urgencyVal.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        title="Calibrate Priority Upward"
+                        onClick={() => adjustTopicWeight(weightObj.topic, weightObj.weight + 0.1)}
+                        className="p-1.5 border border-border hover:border-accent bg-bg-surface hover:bg-accent-light text-text-secondary hover:text-accent rounded-md cursor-pointer transition-all"
+                      >
+                        <ChevronUp size={14} />
+                      </button>
+                      <button
+                        title="Calibrate Priority Downward"
+                        onClick={() => adjustTopicWeight(weightObj.topic, weightObj.weight - 0.1)}
+                        className="p-1.5 border border-border hover:border-accent bg-bg-surface hover:bg-accent-light text-text-secondary hover:text-accent rounded-md cursor-pointer transition-all"
+                      >
+                        <ChevronDown size={14} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-
-                <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t border-border/30 pt-3 md:pt-0 md:border-0">
-                  <div className="space-y-1 md:text-right">
-                    <span className="text-[9px] font-mono text-text-secondary uppercase tracking-widest block font-bold">
-                      ATTENTION WEIGHT
-                    </span>
-                    <span className="font-mono text-xs font-black text-accent-text bg-accent-light px-2 py-0.5 rounded-md border border-accent/25">
-                      {urgencyVal.toFixed(2)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      title="Calibrate Priority Upward"
-                      onClick={() => adjustTopicWeight(weightObj.topic, weightObj.weight + 0.1)}
-                      className="p-1.5 border border-border hover:border-accent bg-bg-surface hover:bg-accent-light text-text-secondary hover:text-accent rounded-md cursor-pointer transition-all"
-                    >
-                      <ChevronUp size={14} />
-                    </button>
-                    <button
-                      title="Calibrate Priority Downward"
-                      onClick={() => adjustTopicWeight(weightObj.topic, weightObj.weight - 0.1)}
-                      className="p-1.5 border border-border hover:border-accent bg-bg-surface hover:bg-accent-light text-text-secondary hover:text-accent rounded-md cursor-pointer transition-all"
-                    >
-                      <ChevronDown size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          ) : (
+            <div className="text-center py-8 border border-dashed border-border/60 rounded-md font-mono text-xs text-text-secondary uppercase">
+              No matching topics found.
+            </div>
+          )}
         </div>
       </div>
 
