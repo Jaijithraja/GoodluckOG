@@ -72,37 +72,42 @@ export default function TodayPlanPage() {
   // Pomodoro/Focus Timer Ticking logic
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (isTimerRunning && timerSeconds > 0) {
+    if (isTimerRunning) {
       interval = setInterval(() => {
-        setTimerSeconds((prev) => prev - 1);
-      }, 1000);
-    } else if (timerSeconds === 0 && isTimerRunning) {
-      setIsTimerRunning(false);
-      
-      // Web Audio Beep Chime
-      try {
-        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.type = "sine";
-        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
-        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.35);
-      } catch (e) {
-        console.warn("Audio chime failed", e);
-      }
+        setTimerSeconds((prev) => {
+          if (prev <= 1) {
+            setIsTimerRunning(false);
+            if (interval) clearInterval(interval);
+            
+            // Web Audio Beep Chime
+            try {
+              const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+              const oscillator = audioCtx.createOscillator();
+              const gainNode = audioCtx.createGain();
+              oscillator.type = "sine";
+              oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+              gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+              oscillator.connect(gainNode);
+              gainNode.connect(audioCtx.destination);
+              oscillator.start();
+              oscillator.stop(audioCtx.currentTime + 0.35);
+            } catch (e) {
+              console.warn("Audio chime failed", e);
+            }
 
-      setToastMessage("Focus Session Complete! Ready to log.");
-      setLogForm((prev) => ({ ...prev, actualDuration: timerDuration }));
-      setTimerTab("manual");
+            setToastMessage("Focus Session Complete! Ready to log.");
+            setLogForm((prevLog) => ({ ...prevLog, actualDuration: timerDuration }));
+            setTimerTab("manual");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isTimerRunning, timerSeconds, timerDuration]);
+  }, [isTimerRunning, timerDuration]);
 
   const generatePlan = async (studentId: string) => {
     setGeneratingPlan(true);
