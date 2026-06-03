@@ -475,13 +475,15 @@ export default function Home() {
                         strokeWidth="2.5" 
                         fill="transparent" 
                         strokeDasharray="175"
-                        strokeDashoffset={175 - (175 * 65) / 100}
+                        strokeDashoffset={175 * (1 - (pomoTime / 1500))}
                         style={{ transformOrigin: "center", transform: `rotate(${focusCircleOffset}deg)` }}
                       />
                     </svg>
-                    <span className="font-mono text-[10px] text-text-primary font-extrabold pt-0.5">01:56</span>
+                    <span className="font-mono text-[10px] text-text-primary font-extrabold pt-0.5">{formatTime(pomoTime)}</span>
                   </div>
-                  <span className="font-mono text-[8px] text-text-secondary uppercase tracking-widest mt-2 block font-black">Math Focus Session Active</span>
+                  <span className="font-mono text-[8px] text-text-secondary uppercase tracking-widest mt-2 block font-black">
+                    {pomoActive ? "Math Focus Session Active" : "Math Focus Session Paused"}
+                  </span>
                 </div>
               </div>
 
