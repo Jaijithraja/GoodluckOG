@@ -96,7 +96,7 @@ export default function TodayPlanPage() {
               console.warn("Audio chime failed", e);
             }
 
-            setToastMessage("Focus Session Complete! Ready to log.");
+            setToastMessage("Nice work! Go ahead and log your session.");
             setLogForm((prevLog) => ({ ...prevLog, actualDuration: timerDuration }));
             setTimerTab("manual");
             return 0;
@@ -277,9 +277,9 @@ export default function TodayPlanPage() {
         origin: { y: 0.6 },
         colors: ["#E8FF47", "#4ADE80", "#F5F5F5"],
       });
-      setToastMessage("Session synchronized. Adaptation models scaled.");
+      setToastMessage("Session logged! Keep going 🎉");
     } else {
-      setToastMessage("Session logged. Study weights adapted.");
+      setToastMessage("Logged. It's okay — tomorrow is a fresh start.");
     }
 
     setTimeout(() => {
@@ -329,7 +329,7 @@ export default function TodayPlanPage() {
         <div className="bg-[#4ADE80]/5 border border-[#4ADE80]/20 rounded-lg p-4 flex items-start gap-3 shadow-sm text-xs font-sans animate-fade-in">
           <Brain size={16} className="text-accent stroke-[2] mt-0.5" />
           <div className="space-y-0.5">
-            <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest font-bold block">This Week&apos;s Focal Sync</span>
+            <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest font-bold block">This Week's Focus Tip</span>
             <p className="text-text-primary leading-relaxed">{weeklyReports[0].narrative.one_change}</p>
           </div>
         </div>
@@ -364,16 +364,16 @@ export default function TodayPlanPage() {
       <div className="bg-bg-elevated border border-border rounded-lg p-6 md:p-8 space-y-6 shadow-warm relative overflow-hidden">
         <div className="flex justify-between items-center mb-4">
           <div className="space-y-1">
-            <h2 className="font-display font-semibold text-lg text-text-primary">Daily Study Blocks</h2>
+            <h2 className="font-display font-semibold text-lg text-text-primary">Today's Study Blocks</h2>
             <p className="text-xs text-text-secondary font-sans leading-relaxed">
-              Calibrated dynamically according to your weakness weight constraints.
+              These are picked based on where you need the most work right now.
             </p>
           </div>
 
           <button
             onClick={() => {
               replanToday();
-              setToastMessage("AI recalibration complete.");
+              setToastMessage("Plan refreshed! Here's your updated schedule.");
               setTimeout(() => setToastMessage(""), 3000);
             }}
             className="flex items-center gap-1.5 border border-border-strong hover:border-accent hover:bg-accent-light text-[10px] font-mono font-bold tracking-widest text-text-secondary hover:text-accent-text py-2.5 px-4 rounded-md transition-all cursor-pointer uppercase"
@@ -395,7 +395,7 @@ export default function TodayPlanPage() {
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-[9px] font-black text-warning bg-warning/10 border border-warning/25 px-2 py-0.5 rounded-badge tracking-widest uppercase flex items-center gap-1">
                         <Zap size={9} className="stroke-[2.5]" />
-                        Study Avoidance Watchpoint
+                        You've been avoiding this one
                       </span>
                     </div>
                     <p className="text-xs text-text-secondary leading-relaxed font-sans">
@@ -410,7 +410,7 @@ export default function TodayPlanPage() {
                               ...s,
                               duration_minutes: 15,
                               session_type: "Practice" as const,
-                              rationale: "Scaled down dynamically to break study avoidance friction."
+                              rationale: "Switched to a short 15-minute warmup to get you started."
                             };
                           }
                           return s;
@@ -439,7 +439,7 @@ export default function TodayPlanPage() {
                         }
                         
                         setAvoidanceApplied(true);
-                        setToastMessage("Warmup applied! Planned block scaled to 15m.");
+                        setToastMessage("Warmup set! Just 15 minutes to get going.");
                         setTimeout(() => setToastMessage(""), 4000);
                         
                         // Automatically open focus timer modal and run it
@@ -526,7 +526,7 @@ export default function TodayPlanPage() {
                       className="text-[9px] font-mono tracking-wider text-text-secondary hover:text-text-primary flex items-center gap-1.5 cursor-pointer uppercase transition-colors font-bold"
                     >
                       <HelpCircle size={12} />
-                      <span>{expandedSessionIdx === idx ? "HIDE ADAPTIVE ANALYSIS" : "VIEW ADAPTIVE ANALYSIS"}</span>
+                      <span>{expandedSessionIdx === idx ? "HIDE WHY THIS TOPIC" : "WHY THIS TOPIC?"}</span>
                     </button>
 
                     {expandedSessionIdx === idx && (
@@ -540,7 +540,7 @@ export default function TodayPlanPage() {
             })
           ) : (
             <div className="text-center p-8 border border-dashed border-border/60 rounded-md font-mono text-xs text-text-secondary uppercase">
-              No sessions active. Replanning available.
+              No sessions for today yet. Hit Replan to generate one.
             </div>
           )}
         </div>
@@ -549,7 +549,7 @@ export default function TodayPlanPage() {
         {activePlan && (
           <div className="bg-bg-base border border-border rounded-md p-4 text-xs">
             <span className="font-mono text-[9px] text-accent uppercase tracking-widest font-black block mb-1">
-              AI STUDY TIP
+              A QUICK TIP
             </span>
             <p className="text-text-secondary leading-relaxed font-sans">{activePlan.rationale}</p>
           </div>
@@ -567,7 +567,7 @@ export default function TodayPlanPage() {
               Subject Priority Board
             </h2>
             <p className="text-xs text-text-secondary font-sans leading-relaxed">
-              Track and calibrate your weakest areas. Use search or toggle view options to find specific topics.
+              See where you're struggling and nudge the priority up or down as needed.
             </p>
           </div>
         </div>
@@ -623,16 +623,16 @@ export default function TodayPlanPage() {
                 urgencyLabel = "NEEDS ATTENTION";
                 urgencyColor = "text-danger bg-danger-light border-danger/35";
                 reasonStr = weightObj.avoidance_flag 
-                  ? "You seem to be skipping this topic recently: study this first."
-                  : "You have not studied this topic in a while: schedule a session.";
+                  ? "Looks like you've been avoiding this one — let's ease back in with a short session."
+                  : "You haven't touched this in a while. Worth putting it back on the plan.";
               } else if (urgencyVal >= 0.6) {
                 urgencyLabel = "HIGH PRIORITY";
                 urgencyColor = "text-warning bg-warning-light border-warning/35";
-                reasonStr = "Your focus on this section is below your target plan.";
+                reasonStr = "You're a bit behind here. Try squeezing in some extra time this week.";
               } else if (urgencyVal < 0.35) {
                 urgencyLabel = "WELL PREPARED";
                 urgencyColor = "text-success bg-success-light border-success/35";
-                reasonStr = "You are doing great in this topic: keep it revised.";
+                reasonStr = "You're solid here. Just keep revising so it stays fresh.";
               }
 
               let secBadge = "bg-[#3B82F6]/10 text-[#93C5FD] border border-[#3B82F6]/30";
@@ -691,7 +691,7 @@ export default function TodayPlanPage() {
             })
           ) : (
             <div className="text-center py-8 border border-dashed border-border/60 rounded-md font-mono text-xs text-text-secondary uppercase">
-              No matching topics found.
+              No topics match your search.
             </div>
           )}
         </div>
@@ -709,7 +709,7 @@ export default function TodayPlanPage() {
               <div className="flex items-center gap-2.5">
                 <Brain className="text-accent stroke-[2]" size={20} />
                 <h3 className="font-display font-bold text-base text-text-primary tracking-wide uppercase">
-                  SESSION CONTROL CENTER
+                  FOCUS SESSION
                 </h3>
               </div>
               <button
@@ -881,7 +881,7 @@ export default function TodayPlanPage() {
                       } catch {}
                       setLogForm((prev) => ({ ...prev, actualDuration: timerDuration }));
                       setTimerTab("manual");
-                      setToastMessage("Focus block finished. Summarise your progress below.");
+                      setToastMessage("Done! Fill in how it went below.");
                     }}
                     className="p-3 border border-border bg-bg-surface hover:bg-bg-elevated hover:border-border-strong text-text-secondary rounded-md cursor-pointer transition-all shadow-sm"
                   >
@@ -906,15 +906,15 @@ export default function TodayPlanPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary mb-2 font-bold">
-                      Execution State
+                      Did you finish?
                     </label>
                     <select
                       value={logForm.completed ? "yes" : "no"}
                       onChange={(e) => setLogForm({ ...logForm, completed: e.target.value === "yes" })}
                       className="w-full bg-bg-surface border border-border text-text-primary text-sm rounded-md py-2.5 px-3 focus:outline-none focus:border-accent"
                     >
-                      <option value="yes">Completed successfully</option>
-                      <option value="no">Abandoned mid-way</option>
+                      <option value="yes">Yes, finished it</option>
+                      <option value="no">Nope, stopped early</option>
                     </select>
                   </div>
 
@@ -937,7 +937,7 @@ export default function TodayPlanPage() {
 
                 <div>
                   <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary mb-2 font-bold">
-                    Cognitive Difficulty (1-5)
+                    How hard was it? (1 = easy, 5 = brutal)
                   </label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((lvl) => (
@@ -959,7 +959,7 @@ export default function TodayPlanPage() {
 
                 <div>
                   <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary mb-2 font-bold">
-                    Focus Quality (1-5)
+                    How focused were you? (1 = distracted, 5 = locked in)
                   </label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((lvl) => (
@@ -981,7 +981,7 @@ export default function TodayPlanPage() {
 
                 <div>
                   <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary mb-1.5 font-bold">
-                    Execution Notes (Optional)
+                    Quick note (optional)
                   </label>
                   <input
                     type="text"
@@ -996,7 +996,7 @@ export default function TodayPlanPage() {
                   type="submit"
                   className="w-full bg-accent hover:bg-accent/90 text-[#0A0A0A] text-xs font-mono font-black py-3.5 rounded-md flex items-center justify-center gap-2 transition-all cursor-pointer uppercase tracking-widest mt-6 shadow-sm hover:shadow"
                 >
-                  <span>Synchronize Execution Log</span>
+                  <span>Save Session</span>
                   <CheckCircle2 size={14} className="stroke-[2.5]" />
                 </button>
               </form>

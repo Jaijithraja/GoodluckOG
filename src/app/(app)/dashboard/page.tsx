@@ -251,7 +251,7 @@ export default function DashboardPage() {
           <div className="space-y-3">
             {student.burnout_risk_score >= 0.5 && student.burnout_risk_score < 0.8 && (
               <div className="text-[9px] text-[#F59E0B] font-mono bg-[#F59E0B]/10 border border-[#F59E0B]/20 p-2.5 rounded leading-relaxed uppercase animate-fade-in">
-                ⚠️ Fatigue rising. Click below to schedule a proactive recovery session.
+                ⚠️ You're feeling the grind. Schedule a proper rest — it helps more than pushing through.
               </div>
             )}
 
@@ -391,7 +391,7 @@ export default function DashboardPage() {
         {/* Adaptation Log Widget */}
         <div className="bg-bg-elevated border border-border rounded-lg p-6 shadow-warm">
           <span className="font-mono text-[10px] text-text-secondary tracking-wider uppercase block mb-4 font-bold">
-            System Adaptation Logs
+            Adaptation History
           </span>
 
           <div className="space-y-4 max-h-[190px] overflow-y-auto pr-2">
@@ -410,7 +410,7 @@ export default function DashboardPage() {
               ))
             ) : (
               <div className="text-center font-mono text-xs text-text-secondary py-8 uppercase">
-                No adaptation triggers logged. Complete sessions to populate.
+                Nothing here yet. Complete a few sessions and we'll show you what's been adjusted.
               </div>
             )}
           </div>

@@ -267,7 +267,7 @@ export default function WeeklyPage() {
               <div className="bg-bg-elevated border border-accent/25 p-6 rounded-lg shadow-warm relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-[3px] bg-accent" />
                 <span className="font-mono text-[9px] text-accent uppercase tracking-widest block mb-2 font-black">
-                  Executive Diagnosis
+                  This week in a nutshell
                 </span>
                 <h2 className="font-display font-medium text-lg text-text-primary leading-relaxed">
                   &quot;{latestReport.narrative?.headline || "No baseline computed yet."}&quot;
@@ -295,12 +295,12 @@ export default function WeeklyPage() {
                   </div>
 
                   <div>
-                    <span className="font-mono text-[10px] uppercase font-black text-text-primary block mb-1">Strategic Shift Plan</span>
+                    <span className="font-mono text-[10px] uppercase font-black text-text-primary block mb-1">One thing to change</span>
                     <p>{latestReport.narrative?.one_change}</p>
                   </div>
 
                   <div className="p-4 bg-bg-surface rounded-md border border-border/60">
-                    <span className="font-mono text-[10px] uppercase font-black text-accent block mb-1">Study Priority Adaptation</span>
+                    <span className="font-mono text-[10px] uppercase font-black text-accent block mb-1">How your plan shifted this week</span>
                     <p className="text-xs">{latestReport.narrative?.adaptation_summary}</p>
                   </div>
 
@@ -349,7 +349,7 @@ export default function WeeklyPage() {
             </div>
           ) : (
             <div className="text-center p-12 bg-bg-elevated border border-dashed border-border rounded-lg font-mono text-xs text-text-secondary uppercase shadow-sm">
-              No weekly reports logged. Tap the generator to analyze study metrics.
+              No reports yet. Hit the button above to generate your first weekly review.
             </div>
           )}
 

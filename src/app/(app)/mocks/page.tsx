@@ -226,7 +226,7 @@ export default function MocksPage() {
                       {debrief.two_things_that_worked && debrief.two_things_that_worked.length > 0 && (
                         <div className="space-y-2">
                           <h5 className="text-[10px] font-mono uppercase tracking-wider text-success font-black flex items-center gap-1.5">
-                            <CheckCircle2 size={12} /> Execution Wins
+                            <CheckCircle2 size={12} /> What went well
                           </h5>
                           <ul className="list-disc list-inside text-xs text-text-secondary pl-2 space-y-1.5 font-sans leading-relaxed">
                             {debrief.two_things_that_worked.map((w, wIdx) => (

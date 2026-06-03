@@ -196,10 +196,10 @@ export default function PodPage() {
             <div className="p-4 bg-success-light border border-success/25 rounded-md text-center space-y-3 shadow-inner">
               <CheckCircle2 size={32} className="text-success mx-auto stroke-[2]" />
               <h4 className="font-display font-bold text-sm text-text-primary uppercase">
-                STATUS SUBMITTED
+                CHECK-IN DONE ✓
               </h4>
               <p className="text-[10px] text-text-secondary leading-relaxed font-sans">
-                Delta-99 sync complete. Keep showing up.
+                Glad you showed up this week. See you next Sunday.
               </p>
             </div>
           ) : (
@@ -224,7 +224,7 @@ export default function PodPage() {
 
               <div>
                 <label className="block text-[9px] font-mono uppercase tracking-wider text-text-secondary mb-1.5 font-bold">
-                  Execution Struggle
+                  What was hard this week
                 </label>
                 <textarea
                   placeholder="e.g. Geometry formula recall remains high load..."
