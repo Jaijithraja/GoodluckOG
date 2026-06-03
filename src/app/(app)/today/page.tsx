@@ -243,7 +243,7 @@ export default function TodayPlanPage() {
     });
     setTimerDuration(session.duration_minutes);
     setTimerSeconds(session.duration_minutes * 60);
-    setIsTimerRunning(false);
+    setIsTimerRunning(true);
     setTimerTab("timer");
     setCommitmentChecked(false);
     setShowLogger(true);
@@ -762,7 +762,11 @@ export default function TodayPlanPage() {
                 </div>
 
                 {/* Circular Countdown Tracker */}
-                <div className="relative w-44 h-44 flex items-center justify-center">
+                <div 
+                  onClick={() => setIsTimerRunning(!isTimerRunning)}
+                  className="relative w-44 h-44 flex items-center justify-center cursor-pointer hover:scale-[1.02] active:scale-95 transition-all select-none"
+                  title="Click to play/pause"
+                >
                   <svg className="absolute w-full h-full -rotate-90" viewBox="0 0 120 120">
                     {/* Background track */}
                     <circle
