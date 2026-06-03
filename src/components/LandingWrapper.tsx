@@ -17,7 +17,7 @@ export function LandingWrapper({ children }: Props) {
     opacity: showContent ? 1 : 0,
     transform: showContent ? 'translateY(0)' : 'translateY(14px)',
     transition: showContent
-      ? 'opacity 600ms ease-out, transform 600ms ease-out'
+      ? 'opacity 800ms ease-out, transform 800ms ease-out'
       : 'none',
   }
 

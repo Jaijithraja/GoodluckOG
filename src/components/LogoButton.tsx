@@ -10,7 +10,7 @@ export function LogoButton() {
     play()
     setTimeout(() => {
       router.push('/')
-    }, 1950)
+    }, 2500)
   }
 
   return (
