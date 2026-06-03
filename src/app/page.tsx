@@ -331,168 +331,180 @@ export default function Home() {
         {/* Dynamic neon glow behind the text */}
         <div className="hero-neon-glow" />
 
-        {/* Floating coordinate badges */}
-        <div className="absolute inset-x-0 top-0 h-[480px] pointer-events-none hidden lg:flex justify-center select-none z-0">
-          <div className="relative w-full max-w-[1200px] h-full">
-            <div className="absolute top-[22%] left-[2%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm">
-              <span className="w-2 h-2 rounded-full bg-success" />
-              <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
-                Study Session: <span className="text-text-primary font-extrabold">Active</span>
-              </span>
-            </div>
+        {/* Container wrapping everything to align coordinate badges relative to the content flow */}
+        <div className="relative w-full max-w-[1200px] flex flex-col items-center z-10">
+          
+          {/* Floating coordinate badges - positioned relative to the 1200px layout container, and locked vertically to the hero text portion */}
+          <div className="absolute inset-x-0 top-0 h-[420px] pointer-events-none hidden lg:block select-none z-0">
+            <div className="relative w-full h-full">
+              
+              {/* Study Session: Active */}
+              <div className="absolute top-[18%] left-[2%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm">
+                <span className="w-2 h-2 rounded-full bg-success" />
+                <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
+                  Study Session: <span className="text-text-primary font-extrabold">Active</span>
+                </span>
+              </div>
 
-            <div className="absolute top-[35%] right-[2%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm animate-float-a">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
-                Plan Status: <span className="text-text-primary font-extrabold">Updating Daily</span>
-              </span>
-            </div>
+              {/* Plan Status: Updating Daily */}
+              <div className="absolute top-[32%] right-[2%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm animate-float-a">
+                <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
+                  Plan Status: <span className="text-text-primary font-extrabold">Updating Daily</span>
+                </span>
+              </div>
 
-            <div className="absolute bottom-[30%] left-[2%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm animate-float-b">
-              <span className="w-2 h-2 rounded-full bg-danger" />
-              <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
-                <span className="text-danger font-extrabold">DILR Needs Attention</span>
-              </span>
-            </div>
+              {/* DILR Needs Attention */}
+              <div className="absolute top-[75%] left-[2%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm animate-float-b">
+                <span className="w-2 h-2 rounded-full bg-danger" />
+                <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
+                  <span className="text-danger font-extrabold">DILR Needs Attention</span>
+                </span>
+              </div>
 
-            <div className="absolute top-[16%] right-[8%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm">
-              <span className="w-2 h-2 rounded-full bg-accent" />
-              <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
-                Target: <span className="text-text-primary font-extrabold">99%ile</span>
-              </span>
-            </div>
+              {/* Target: 99%ile */}
+              <div className="absolute top-[10%] right-[8%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm">
+                <span className="w-2 h-2 rounded-full bg-accent" />
+                <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
+                  Target: <span className="text-text-primary font-extrabold">99%ile</span>
+                </span>
+              </div>
 
-            <div className="absolute bottom-[38%] right-[2%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm animate-float-a">
-              <span className="w-2 h-2 rounded-full bg-warning" />
-              <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
-                Streak: <span className="text-text-primary font-extrabold">18 days</span>
-              </span>
-            </div>
+              {/* Streak: 18 days */}
+              <div className="absolute top-[58%] right-[2%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm animate-float-a">
+                <span className="w-2 h-2 rounded-full bg-warning" />
+                <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
+                  Streak: <span className="text-text-primary font-extrabold">18 days</span>
+                </span>
+              </div>
 
-            <div className="absolute bottom-[20%] right-[8%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm animate-float-b">
-              <span className="w-2 h-2 rounded-full bg-success" />
-              <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
-                Mock Phase: <span className="text-text-primary font-extrabold">Ready</span>
-              </span>
-            </div>
-          </div>
-        </div>
+              {/* Mock Phase: Ready */}
+              <div className="absolute top-[82%] right-[8%] bg-bg-surface border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-warm animate-float-b">
+                <span className="w-2 h-2 rounded-full bg-success" />
+                <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-wider">
+                  Mock Phase: <span className="text-text-primary font-extrabold">Ready</span>
+                </span>
+              </div>
 
-        <div className="max-w-[850px] w-full text-center space-y-8 relative z-10 flex flex-col items-center">
-          <span className="font-mono text-[10px] text-accent-text tracking-widest uppercase font-bold border border-accent/20 px-3 py-1 rounded-full bg-bg-surface/50">
-            A SYSTEMATIC STUDY METHOD FOR CAT ASPIRANTS
-          </span>
-
-          <h1 className="text-3xl sm:text-5xl md:text-7.5xl font-display tracking-tight leading-tight text-text-primary font-extrabold max-w-[850px] uppercase">
-            Crack CAT <br />
-            Without Burning Out. <br />
-            <span className="text-accent italic font-normal">Stay Consistent.</span>
-          </h1>
-
-          <p className="text-sm sm:text-base text-text-secondary max-w-[550px] leading-relaxed font-light font-sans">
-            AI builds your study plan, tracks your consistency, and helps you stay on track until exam day. Build a daily habit that gets you into your dream B-school.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 pt-2 items-center">
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Link
-                href={mounted && student ? "/today" : "/onboarding"}
-                className="bg-accent text-[#0A0A0A] text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase shadow-md animate-cta-glow cursor-pointer text-center font-black"
-              >
-                {mounted && student ? "Go to Dashboard" : "Start My CAT Plan"}
-              </Link>
             </div>
           </div>
 
-          {/* Social Proof avatars */}
-          <div className="flex items-center gap-2.5 pt-6">
-            <div className="flex -space-x-2">
-              <div className="w-8 h-8 rounded-full border-2 border-bg-base bg-bg-surface text-[10px] flex items-center justify-center font-bold text-text-secondary">A</div>
-              <div className="w-8 h-8 rounded-full border-2 border-bg-base bg-accent text-[10px] flex items-center justify-center font-bold text-[#0A0A0A]">R</div>
-              <div className="w-8 h-8 rounded-full border-2 border-bg-base bg-success text-[10px] flex items-center justify-center font-bold text-[#0A0A0A]">S</div>
-              <div className="w-8 h-8 rounded-full border-2 border-bg-base bg-dilr text-[10px] flex items-center justify-center font-bold text-white">P</div>
-            </div>
-            <span className="text-[10px] font-mono text-text-secondary tracking-wider uppercase font-bold">
-              Built for CAT 2026 aspirants
+          <div className="max-w-[850px] w-full text-center space-y-8 relative z-10 flex flex-col items-center">
+            <span className="font-mono text-[10px] text-accent-text tracking-widest uppercase font-bold border border-accent/20 px-3 py-1 rounded-full bg-bg-surface/50">
+              A SYSTEMATIC STUDY METHOD FOR CAT ASPIRANTS
             </span>
+
+            <h1 className="text-3xl sm:text-5xl md:text-7.5xl font-display tracking-tight leading-tight text-text-primary font-extrabold max-w-[850px] uppercase">
+              Crack CAT <br />
+              Without Burning Out. <br />
+              <span className="text-accent italic font-normal">Stay Consistent.</span>
+            </h1>
+
+            <p className="text-sm sm:text-base text-text-secondary max-w-[550px] leading-relaxed font-light font-sans">
+              AI builds your study plan, tracks your consistency, and helps you stay on track until exam day. Build a daily habit that gets you into your dream B-school.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-2 items-center">
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <Link
+                  href={mounted && student ? "/today" : "/onboarding"}
+                  className="bg-accent text-[#0A0A0A] text-[11px] font-mono font-bold tracking-widest py-4 px-9 rounded-full transition-all uppercase shadow-md animate-cta-glow cursor-pointer text-center font-black"
+                >
+                  {mounted && student ? "Go to Dashboard" : "Start My CAT Plan"}
+                </Link>
+              </div>
+            </div>
+
+            {/* Social Proof avatars */}
+            <div className="flex items-center gap-2.5 pt-6">
+              <div className="flex -space-x-2">
+                <div className="w-8 h-8 rounded-full border-2 border-bg-base bg-bg-surface text-[10px] flex items-center justify-center font-bold text-text-secondary">A</div>
+                <div className="w-8 h-8 rounded-full border-2 border-bg-base bg-accent text-[10px] flex items-center justify-center font-bold text-[#0A0A0A]">R</div>
+                <div className="w-8 h-8 rounded-full border-2 border-bg-base bg-success text-[10px] flex items-center justify-center font-bold text-[#0A0A0A]">S</div>
+                <div className="w-8 h-8 rounded-full border-2 border-bg-base bg-dilr text-[10px] flex items-center justify-center font-bold text-white">P</div>
+              </div>
+              <span className="text-[10px] font-mono text-text-secondary tracking-wider uppercase font-bold">
+                Built for CAT 2026 aspirants
+              </span>
+            </div>
+
+            {/* Bottom Preview Widgets Grid (Screenshot 3 style) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-[850px] pt-14 text-left">
+              
+              {/* Widget 1: Personal Week Plan */}
+              <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-warm space-y-3">
+                <div className="flex items-center gap-2 border-b border-border/40 pb-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                  <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest font-black">PERSONAL WEEKLY PLAN</span>
+                </div>
+                <div className="space-y-2 font-mono text-[9px] uppercase tracking-wider text-text-secondary">
+                  <div className="flex justify-between items-center py-1 border-b border-border/20">
+                    <span>MON</span>
+                    <span className="bg-success-light text-success border border-success/20 px-2 py-0.5 rounded text-[8px] font-black">Math Practice &bull; 2h</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-b border-border/20">
+                    <span>TUE</span>
+                    <span className="bg-[#8B5CF6]/10 text-[#C4B5FD] border border-[#8B5CF6]/20 px-2 py-0.5 rounded text-[8px] font-black">DILR Caselets &bull; 1.5h</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1 border-b border-border/20">
+                    <span>WED</span>
+                    <span className="bg-accent-light text-accent-text border border-accent/20 px-2 py-0.5 rounded text-[8px] font-black">Mock Test Analysis &bull; 2h</span>
+                  </div>
+                  <div className="flex justify-between items-center py-1">
+                    <span>THU</span>
+                    <span className="bg-bg-sunken text-text-secondary border border-border px-2 py-0.5 rounded text-[8px] font-black">Verbal Reading Comp &bull; 1h</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Widget 2: Study Session Timer */}
+              <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-warm space-y-4 flex flex-col justify-between">
+                <div className="flex items-center gap-2 border-b border-border/40 pb-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                  <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest font-black">STUDY SESSION TIMER</span>
+                </div>
+                <div className="flex flex-col items-center py-1">
+                  <div className="relative w-16 h-16 flex items-center justify-center">
+                    <svg className="absolute w-full h-full transform -rotate-95">
+                      <circle cx="32" cy="32" r="28" stroke="var(--border)" strokeWidth="2.5" fill="transparent" />
+                      <circle 
+                        cx="32" 
+                        cy="32" 
+                        r="28" 
+                        stroke="var(--accent)" 
+                        strokeWidth="2.5" 
+                        fill="transparent" 
+                        strokeDasharray="175"
+                        strokeDashoffset={175 - (175 * 65) / 100}
+                        style={{ transformOrigin: "center", transform: `rotate(${focusCircleOffset}deg)` }}
+                      />
+                    </svg>
+                    <span className="font-mono text-[10px] text-text-primary font-extrabold pt-0.5">01:56</span>
+                  </div>
+                  <span className="font-mono text-[8px] text-text-secondary uppercase tracking-widest mt-2 block font-black">Math Focus Session Active</span>
+                </div>
+              </div>
+
+              {/* Widget 3: Consistency Streak */}
+              <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-warm space-y-3 flex flex-col justify-between">
+                <div className="flex items-center gap-2 border-b border-border/40 pb-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning" />
+                  <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest font-black">CONSISTENCY STREAK</span>
+                </div>
+                <div className="text-center py-1">
+                  <div className="font-display font-bold text-4xl text-warning tracking-tight leading-none">18</div>
+                  <span className="font-mono text-[8px] text-text-tertiary uppercase tracking-widest mt-1 block font-black">DAY CONSISTENCY STREAK</span>
+                </div>
+                <div className="flex gap-1 justify-center">
+                  {Array.from({ length: 7 }).map((_, idx) => (
+                    <div key={idx} className={`w-3.5 h-1.5 rounded-sm ${idx < 5 ? "bg-success" : "bg-bg-sunken border border-border"}`} />
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
           </div>
-
-          {/* Bottom Preview Widgets Grid (Screenshot 3 style) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-[850px] pt-14 text-left">
-            
-            {/* Widget 1: Personal Week Plan */}
-            <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-warm space-y-3">
-              <div className="flex items-center gap-2 border-b border-border/40 pb-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-success" />
-                <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest font-black">PERSONAL WEEKLY PLAN</span>
-              </div>
-              <div className="space-y-2 font-mono text-[9px] uppercase tracking-wider text-text-secondary">
-                <div className="flex justify-between items-center py-1 border-b border-border/20">
-                  <span>MON</span>
-                  <span className="bg-success-light text-success border border-success/20 px-2 py-0.5 rounded text-[8px] font-black">Math Practice &bull; 2h</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b border-border/20">
-                  <span>TUE</span>
-                  <span className="bg-[#8B5CF6]/10 text-[#C4B5FD] border border-[#8B5CF6]/20 px-2 py-0.5 rounded text-[8px] font-black">DILR Caselets &bull; 1.5h</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b border-border/20">
-                  <span>WED</span>
-                  <span className="bg-accent-light text-accent-text border border-accent/20 px-2 py-0.5 rounded text-[8px] font-black">Mock Test Analysis &bull; 2h</span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span>THU</span>
-                  <span className="bg-bg-sunken text-text-secondary border border-border px-2 py-0.5 rounded text-[8px] font-black">Verbal Reading Comp &bull; 1h</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Widget 2: Study Session Timer */}
-            <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-warm space-y-4 flex flex-col justify-between">
-              <div className="flex items-center gap-2 border-b border-border/40 pb-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest font-black">STUDY SESSION TIMER</span>
-              </div>
-              <div className="flex flex-col items-center py-1">
-                <div className="relative w-16 h-16 flex items-center justify-center">
-                  <svg className="absolute w-full h-full transform -rotate-95">
-                    <circle cx="32" cy="32" r="28" stroke="var(--border)" strokeWidth="2.5" fill="transparent" />
-                    <circle 
-                      cx="32" 
-                      cy="32" 
-                      r="28" 
-                      stroke="var(--accent)" 
-                      strokeWidth="2.5" 
-                      fill="transparent" 
-                      strokeDasharray="175"
-                      strokeDashoffset={175 - (175 * 65) / 100}
-                      style={{ transformOrigin: "center", transform: `rotate(${focusCircleOffset}deg)` }}
-                    />
-                  </svg>
-                  <span className="font-mono text-[10px] text-text-primary font-extrabold pt-0.5">01:56</span>
-                </div>
-                <span className="font-mono text-[8px] text-text-secondary uppercase tracking-widest mt-2 block font-black">Math Focus Session Active</span>
-              </div>
-            </div>
-
-            {/* Widget 3: Consistency Streak */}
-            <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-warm space-y-3 flex flex-col justify-between">
-              <div className="flex items-center gap-2 border-b border-border/40 pb-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-warning" />
-                <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest font-black">CONSISTENCY STREAK</span>
-              </div>
-              <div className="text-center py-1">
-                <div className="font-display font-bold text-4xl text-warning tracking-tight leading-none">18</div>
-                <span className="font-mono text-[8px] text-text-tertiary uppercase tracking-widest mt-1 block font-black">DAY CONSISTENCY STREAK</span>
-              </div>
-              <div className="flex gap-1 justify-center">
-                {Array.from({ length: 7 }).map((_, idx) => (
-                  <div key={idx} className={`w-3.5 h-1.5 rounded-sm ${idx < 5 ? "bg-success" : "bg-bg-sunken border border-border"}`} />
-                ))}
-              </div>
-            </div>
-
-          </div>
-
         </div>
       </section>
 
