@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { LoadingScreen } from './LoadingScreen'
 
 interface Props {
@@ -8,6 +8,10 @@ interface Props {
 
 export function LandingWrapper({ children }: Props) {
   const [showContent, setShowContent] = useState(false)
+
+  const handleComplete = useCallback(() => {
+    setShowContent(true)
+  }, [])
 
   const contentStyle: React.CSSProperties = {
     opacity: showContent ? 1 : 0,
@@ -19,7 +23,7 @@ export function LandingWrapper({ children }: Props) {
 
   return (
     <>
-      <LoadingScreen onComplete={() => setShowContent(true)} />
+      <LoadingScreen onComplete={handleComplete} />
       <div style={contentStyle}>
         {children}
       </div>

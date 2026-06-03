@@ -13,6 +13,10 @@ export function LoadingScreen({ onComplete }: Props) {
   const { playing, stop } = useLoadingStore()
 
   useEffect(() => {
+    if (!playing && !onComplete) {
+      return
+    }
+
     setPhase('hidden')
     const t1 = setTimeout(() => setPhase('appear'), 80)
     const t2 = setTimeout(() => setPhase('glow'), 400)
@@ -20,26 +24,13 @@ export function LoadingScreen({ onComplete }: Props) {
     const t4 = setTimeout(() => setPhase('out'), 1600)
     const t5 = setTimeout(() => {
       setPhase('done')
+      if (playing) {
+        stop()
+      }
       onComplete?.()
     }, 1950)
 
-    return () => [t1,t2,t3,t4,t5].forEach(clearTimeout)
-  }, [onComplete])
-
-  useEffect(() => {
-    if (playing) {
-      setPhase('hidden')
-      const t1 = setTimeout(() => setPhase('appear'), 80)
-      const t2 = setTimeout(() => setPhase('glow'), 400)
-      const t3 = setTimeout(() => setPhase('zoom'), 1000)
-      const t4 = setTimeout(() => setPhase('out'), 1600)
-      const t5 = setTimeout(() => {
-        setPhase('done')
-        stop()
-        onComplete?.()
-      }, 1950)
-      return () => [t1,t2,t3,t4,t5].forEach(clearTimeout)
-    }
+    return () => [t1, t2, t3, t4, t5].forEach(clearTimeout)
   }, [playing, stop, onComplete])
 
   if (phase === 'done') return null
