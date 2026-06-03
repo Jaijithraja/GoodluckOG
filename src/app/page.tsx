@@ -302,7 +302,7 @@ export default function Home() {
       {/* ─────────────────────────────────────────────
          2. STICKY NAV BAR (Minimal, dynamic)
          ───────────────────────────────────────────── */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-bg-surface/90 backdrop-blur-md border-b border-border h-16 flex items-center px-6 md:px-12 justify-between text-text-primary">
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-bg-surface backdrop-blur-md border-b border-border h-16 flex items-center px-6 md:px-12 justify-between text-text-primary">
         <LogoButton size={28} />
 
         {/* Center Links */}
@@ -390,7 +390,7 @@ export default function Home() {
           </div>
 
           <div className="max-w-[850px] w-full text-center space-y-8 relative z-10 flex flex-col items-center">
-            <span className="font-mono text-[10px] text-accent-text tracking-widest uppercase font-bold border border-accent/20 px-3 py-1 rounded-full bg-bg-surface/50">
+            <span className="font-mono text-[10px] text-accent-text tracking-widest uppercase font-bold border border-accent/20 px-3 py-1 rounded-full bg-bg-surface">
               A SYSTEMATIC STUDY METHOD FOR CAT ASPIRANTS
             </span>
 
@@ -968,7 +968,7 @@ export default function Home() {
                   />
                 </button>
                 {activeFAQ === idx && (
-                  <div className="p-6 pt-0 border-t border-border text-xs text-text-secondary leading-relaxed font-light font-sans bg-bg-base/50">
+                  <div className="p-6 pt-0 border-t border-border text-xs text-text-secondary leading-relaxed font-light font-sans bg-bg-base">
                     {faq.a}
                   </div>
                 )}

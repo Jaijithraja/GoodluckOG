@@ -225,7 +225,7 @@ export default function MocksPage() {
                     <div className="mt-6 pt-6 border-t border-border space-y-6 animate-fade-in">
                       
                       {debrief.headline && (
-                        <p className="text-xs font-mono font-bold text-text-primary uppercase bg-bg-surface/50 border border-border rounded-md p-3">
+                        <p className="text-xs font-mono font-bold text-text-primary uppercase bg-bg-surface border border-border rounded-md p-3">
                           {debrief.headline}
                         </p>
                       )}
@@ -299,7 +299,7 @@ export default function MocksPage() {
 
             {/* Submitting Loading Overlay */}
             {submitting && (
-              <div className="absolute inset-0 bg-bg-elevated/95 z-50 flex flex-col items-center justify-center p-6 text-center space-y-4 animate-fade-in">
+              <div className="absolute inset-0 bg-bg-elevated z-50 flex flex-col items-center justify-center p-6 text-center space-y-4 animate-fade-in">
                 <RotateCcw className="animate-spin text-accent" size={32} />
                 <div>
                   <h4 className="font-display font-bold text-base text-text-primary uppercase tracking-wider">

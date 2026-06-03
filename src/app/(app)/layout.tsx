@@ -192,7 +192,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Drawer Navigation overlay */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 bg-bg-base/98 z-20 flex flex-col p-8 pt-24 animate-fade-in">
+        <div className="md:hidden fixed inset-0 bg-bg-base z-20 flex flex-col p-8 pt-24 animate-fade-in">
           <nav className="space-y-4 flex-grow">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
