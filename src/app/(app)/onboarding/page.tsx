@@ -6,6 +6,7 @@ import { useStudentStore } from "@/store/studentStore";
 import { Target, Clock, Activity, BookOpen, Heart, ArrowRight, ArrowLeft, Sparkles, CheckCircle2, RotateCcw } from "lucide-react";
 import { PrepPhase, Section } from "@/types";
 import GoodluckLogo from "@/components/GoodluckLogo";
+import { LogoButton } from "@/components/LogoButton";
 import { supabase } from "@/lib/supabase/client";
 
 const SECTIONS = {
@@ -268,9 +269,8 @@ export default function OnboardingPage() {
 
         {step < 6 && (
           <>
-            {/* Header Indicators */}
             <div className="flex justify-between items-center mb-6">
-              <GoodluckLogo size={24} showTagline={false} />
+              <LogoButton size={24} />
               <span className="font-mono text-[10px] text-text-secondary uppercase tracking-widest font-black">
                 STEP {step} OF {totalSteps}
               </span>

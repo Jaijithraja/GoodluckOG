@@ -7,6 +7,7 @@ import { ArrowRight, ShieldCheck, Zap, Heart, Flame, ShieldAlert, Check, Play, S
 import Link from "next/link";
 import GoodluckLogo from "@/components/GoodluckLogo";
 import { LandingWrapper } from "@/components/LandingWrapper";
+import { LogoButton } from "@/components/LogoButton";
 
 // Quiz questions structure - strictly calibrated to serious adult CAT aspirants (22-26 age group)
 const QUESTIONS = [
@@ -302,9 +303,7 @@ export default function Home() {
          2. STICKY NAV BAR (Minimal, dynamic)
          ───────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-40 bg-bg-surface/90 backdrop-blur-md border-b border-border h-16 flex items-center px-6 md:px-12 justify-between text-text-primary">
-        <Link href="/" className="hover:opacity-90 transition-opacity">
-          <GoodluckLogo size={28} showTagline={false} />
-        </Link>
+        <LogoButton size={28} />
 
         {/* Center Links */}
         <div className="hidden md:flex gap-8 text-[10px] font-mono uppercase tracking-widest text-text-secondary">
@@ -1002,7 +1001,7 @@ export default function Home() {
         <div className="max-w-[1080px] mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8">
           
           <div className="space-y-4">
-            <GoodluckLogo size={28} showTagline={false} />
+            <LogoButton size={28} />
             <p className="text-[9px] font-mono text-text-secondary uppercase tracking-widest leading-relaxed max-w-[200px] font-bold">
               A clean study system built for serious CAT preparation. &bull; Copyright &copy; 2026.
             </p>

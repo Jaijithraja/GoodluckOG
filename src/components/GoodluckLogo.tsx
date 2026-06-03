@@ -193,22 +193,17 @@ interface FullLogoProps extends LogoProps {
   showTagline?: boolean;
 }
 
-export default function GoodluckLogo({ className = "", size = 42, showTagline = true }: FullLogoProps) {
+export default function GoodluckLogo({ className = "", size = 32, showTagline = false }: FullLogoProps) {
   return (
-    <div className={`flex items-center gap-3.5 antialiased ${className}`}>
+    <div className={`flex items-center gap-3 antialiased ${className}`}>
       {/* 3D G-Hexagon Graphic */}
       <GoodluckIcon size={size} />
 
       {/* Brand Typographic Identity */}
       <div className="flex flex-col justify-center leading-none">
-        <h1 className="font-display font-medium text-text-primary text-2xl md:text-3xl tracking-tight select-none pt-0.5">
+        <h1 className="font-display font-semibold text-white text-2xl md:text-3xl tracking-tight select-none pt-0.5">
           Goodluck
         </h1>
-        {showTagline && (
-          <span className="font-mono text-[8px] md:text-[9px] tracking-[0.2em] text-accent font-black uppercase mt-1 select-none">
-            Building Your Success
-          </span>
-        )}
       </div>
     </div>
   );
